@@ -4,8 +4,6 @@ import discord
 from discord.ext import commands
 # from discord.ext.commands import bot
 
-
-
 settings = {
     'token': 'NzkxNjUxMjE5NTI5NTMxNDAy.X-SQpg.Sa3Bm-RJ0cusWC_DtL1yPAIoWK4',
     'bot': 'Lyna',
@@ -90,7 +88,6 @@ def init_bot():
                             f'`{PREFIX}test    ` ',
                       inline=False)
 
-
         # Отображаемый блок текста. name - Жирный крупный текст | value - обычный текст под "name"
         # | inline = True - Блоки текста будут в одну строку (https://prnt.sc/uogw2x) / inline = False -
         # Блоки текста будут один под другим (https://prnt.sc/uogx3t)
@@ -117,7 +114,6 @@ def init_bot():
         # Отправляет сообщение и так же преобразует emb в embed
 
         print(f'[Logs:info] Справка по командам была успешно выведена | {PREFIX}help ')
-
 
     # @discord_bot.command()
     # async def __help(ctx):
@@ -154,7 +150,6 @@ def init_bot():
     #     print(f'[Logs:info] Справка по командам была успешно выведена | {PREFIX}help ')
     #     # Информация в консоль, что команда "help" была использована
     #     # Итог: https://prnt.sc/uoh6v6
-
 
     @discord_bot.event
     async def on_message(message):
