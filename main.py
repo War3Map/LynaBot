@@ -74,6 +74,13 @@ def init_bot():
         emb = discord.Embed(title='Вот что я могу:', description='Я пока ещё многого не умею, но точно научусь!',
                             colour=discord.Color.red())
         # title - Жирный крупный текст (Заголовок) | description - Текст под заголовком | colour - Цвет полоски
+        emb.description += f'{PREFIX}crt_ch \n'
+        f'{PREFIX}dice n m - брошу кубик c m-гранями n раз  \n'
+        f'{PREFIX}hello - поприветствую тебя\n'
+        f'{PREFIX}phrase - не хочешь крутую фразочку?)\n'
+        f'{PREFIX}crt_ch name  - создам новый канал с именем name)\n'
+        f'{PREFIX}test  - секретик)\n'
+        'Удачки!)'
 
         emb.set_author(name=context.author.name, icon_url=context.author.avatar_url)
         
