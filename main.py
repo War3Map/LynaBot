@@ -7,7 +7,7 @@ from discord.ext import commands
 
 
 settings = {
-    'token': 'NzkxNjUxMjE5NTI5NTMxNDAy.X-SQpg.xXoj3Q89aNsUZhOHvQKb-fZk7kU',
+    'token': 'NzkxNjUxMjE5NTI5NTMxNDAy.X-SQpg.Sa3Bm-RJ0cusWC_DtL1yPAIoWK4',
     'bot': 'Lyna',
     'id': 791651219529531402,
     'prefix': '!'
