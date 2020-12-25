@@ -55,6 +55,11 @@ def init_bot():
         ]
         await context.send(', '.join(dice_result))
 
+    @discord_bot.command(description='For when you wanna settle the score some other way')
+    async def choose(ctx, *choices: str):
+        """Chooses between multiple choices."""
+        await ctx.send(random.choice(choices))
+
     @discord_bot.command(name='crt_ch', help='Создам канал) Только для админчиков)')
     @commands.has_role('admin')
     async def create_channel(context, channel_name):
@@ -76,11 +81,11 @@ def init_bot():
         emb = discord.Embed(title='Вот что я могу:', description='Я пока ещё многого не умею, но точно научусь!',
                             colour=discord.Color.red())
         # title - Жирный крупный текст (Заголовок) | description - Текст под заголовком | colour - Цвет полоски
-        emb.description += f'{PREFIX}dice n m - брошу кубик c m-гранями n раз  \n' \
-                           f'{PREFIX}hello - поприветствую тебя\n' \
-                           f'{PREFIX}phrase - не хочешь крутую фразочку?)\n' \
-                           f'{PREFIX}crt_ch name  - создам новый канал с именем name)\n' \
-                           f'{PREFIX}test  - секретик)\n'
+        emb.description += (f'\n{PREFIX}dice n m - брошу кубик c m-гранями n раз  \n'
+                            f'{PREFIX}hello - поприветствую тебя\n'
+                            f'{PREFIX}phrase - не хочешь крутую фразочку?)\n'
+                            f'{PREFIX}crt_ch name  - создам новый канал с именем name)\n'
+                            f'{PREFIX}test  - секретик)\n')
         'Удачки!)'
 
         emb.set_author(name=context.author.name, icon_url=context.author.avatar_url)
