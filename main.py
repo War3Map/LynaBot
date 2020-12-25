@@ -117,6 +117,12 @@ def init_bot():
 
         print(f'[Logs:info] Справка по командам была успешно выведена | {PREFIX}help ')
 
+    @discord_bot.command(pass_context=True)
+    @commands.has_role('admin')
+    async def chnick(ctx, member: discord.Member, nick):
+        await member.edit(nick=nick)
+        await ctx.send(f'Nickname was changed for {member.mention} ')
+
     @discord_bot.event
     async def on_message(message):
         if message.author == discord_bot.user:
