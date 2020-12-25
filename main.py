@@ -2,6 +2,7 @@ import random
 
 import discord
 from discord.ext import commands
+
 # from discord.ext.commands import bot
 
 settings = {
@@ -74,16 +75,15 @@ def init_bot():
         emb = discord.Embed(title='Вот что я могу:', description='Я пока ещё многого не умею, но точно научусь!',
                             colour=discord.Color.red())
         # title - Жирный крупный текст (Заголовок) | description - Текст под заголовком | colour - Цвет полоски
-        emb.description += f'{PREFIX}crt_ch \n'
-        f'{PREFIX}dice n m - брошу кубик c m-гранями n раз  \n'
-        f'{PREFIX}hello - поприветствую тебя\n'
-        f'{PREFIX}phrase - не хочешь крутую фразочку?)\n'
-        f'{PREFIX}crt_ch name  - создам новый канал с именем name)\n'
-        f'{PREFIX}test  - секретик)\n'
+        emb.description += f'{PREFIX}dice n m - брошу кубик c m-гранями n раз  \n' \
+                           f'{PREFIX}hello - поприветствую тебя\n' \
+                           f'{PREFIX}phrase - не хочешь крутую фразочку?)\n' \
+                           f'{PREFIX}crt_ch name  - создам новый канал с именем name)\n' \
+                           f'{PREFIX}test  - секретик)\n'
         'Удачки!)'
 
         emb.set_author(name=context.author.name, icon_url=context.author.avatar_url)
-        
+
         print(context.author.name)
         # Отображает: ctx.author.name - Имя отправителя, ctx.author.avatar_url - Аватар отправителя
         emb.add_field(name='Все',
@@ -105,13 +105,7 @@ def init_bot():
         # emb.set_footer(icon_url=context.guild.owner.avatar_url,
         #                text=f'{context.guild.owner.name} !!!!')
 
-        emb.set_footer(text=f'{PREFIX}crt_ch \n'
-                            f' `{PREFIX}dice   `'
-                            f' `{PREFIX}hello`'
-                            f' `{PREFIX}help   ` '
-                            f'`{PREFIX}phrase ` '
-                            f'`{PREFIX}test    ` '
-                            'Удачки!)')
+        emb.set_footer(text='Удачки!)')
 
         # emb.set_thumbnail - Добавляет картинку под текстом
         # | ctx.guild.owner.avatar_url - Аватарка создателя сервера
