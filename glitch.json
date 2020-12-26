@@ -1,6 +1,6 @@
 {
   "install": "pip3 install --user -r requirements.txt",
-  "start": "PYTHONUNBUFFERED=true python3 main.py",
+  "start": "PYTHONUNBUFFERED=true python3 start.py",
   "watch": {
     "ignore": [
       "\\.pyc$"

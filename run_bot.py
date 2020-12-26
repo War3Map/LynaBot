@@ -16,7 +16,7 @@ TOKEN = settings['token']
 PREFIX = settings['prefix']
 
 
-def init_bot():
+def start_bot():
     discord_bot = commands.Bot(command_prefix='!', help_command=None)
 
     # print(f"The bot {settings['bot']} is started")
@@ -144,5 +144,7 @@ def init_bot():
     discord_bot.run(TOKEN)
 
 
-if __name__ == '__main__':
-    init_bot()
+start_bot()
+
+# if __name__ == '__main__':
+#     start_bot()
