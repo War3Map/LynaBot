@@ -5,7 +5,9 @@ from os import environ
 
 BOT_START_FILE = 'run_bot.py'
 # for start PYTHON_PROCESS = 'python3'
-PYTHON_PROCESS = 'python3'
+
+# for testing
+PYTHON_PROCESS = r"C:\Python3.7\python.exe"
 app = Flask(__name__)
 
 
