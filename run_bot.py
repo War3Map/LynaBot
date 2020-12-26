@@ -1,4 +1,5 @@
 import random
+import os
 
 import discord
 from discord.ext import commands
@@ -6,15 +7,15 @@ from discord.ext import commands
 # from discord.ext.commands import bot
 
 settings = {
-    'token': 'NzkxNjUxMjE5NTI5NTMxNDAy.X-SQpg.Sa3Bm-RJ0cusWC_DtL1yPAIoWK4',
     'bot': 'Lyna',
     'id': 791651219529531402,
     'prefix': '!'
 }
 
-TOKEN = settings['token']
-PREFIX = settings['prefix']
 
+# TOKEN = os.getenv("TOKEN")
+
+PREFIX = settings['prefix']
 
 def start_bot():
     discord_bot = commands.Bot(command_prefix='!', help_command=None)
