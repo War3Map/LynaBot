@@ -13,7 +13,7 @@ settings = {
 }
 
 
-# TOKEN = os.getenv("TOKEN")
+TOKEN = os.getenv("TOKEN")
 
 PREFIX = settings['prefix']
 
