@@ -1,10 +1,11 @@
-import random
 import os
 
 import discord
 from discord.ext import commands
 
-# from discord.ext.commands import bot
+import Cogs
+from Cogs import messaging_cog, entertainment_cog,\
+    voice_cog, manage_cog
 
 settings = {
     'bot': 'Lyna',
@@ -12,10 +13,10 @@ settings = {
     'prefix': '!'
 }
 
-
-# TOKEN = os.getenv("TOKEN")
+TOKEN = os.getenv("TOKEN")
 
 PREFIX = settings['prefix']
+
 
 def start_bot():
     discord_bot = commands.Bot(command_prefix='!', help_command=None)
@@ -26,49 +27,18 @@ def start_bot():
     async def on_ready():
         print(f'{discord_bot.user.name}: Приветик! Я снова с вами:)')
 
-    @discord_bot.command()
-    async def test(context, arg):
-        await context.send(arg)
+    @discord_bot.event
+    async def on_message(message):
+        if message.author == discord_bot.user:
+            return
+        if (
+                ("Lyna" in message.content) or
+                ("Лина" in message.content)
 
-    @discord_bot.command(help="вежеливо поприветствую тебя")
-    async def hello(context):  # Создаём функцию и передаём аргумент context.
-        author = context.message.author  # Объявляем переменную author и записываем туда информацию об авторе.
+        ):
+            await message.channel.send('А вот и я=) Вызывали?')
 
-        await context.send(f'Приветствую тебя, хозяин {author.mention}!')
-
-    @discord_bot.command(help="случайная фраза")
-    async def phrase(context):
-        random_fact = [
-            'Добрая рука, как лучик света!',
-            'Няяя! Не нравится? Ну так не смотри!',
-            'Мир да любовь!'
-
-        ]
-
-        response = random.choice(random_fact)
-        await context.send(response)
-
-    @discord_bot.command(help='Брошу кубик столько раз сколько попросите=)')
-    async def dice(context, number_of_dice: int, number_of_sides: int):
-        dice_result = [
-            str(random.choice(range(1, number_of_sides + 1)))
-            for _ in range(number_of_dice)
-        ]
-        await context.send(', '.join(dice_result))
-
-    @discord_bot.command(description='For when you wanna settle the score some other way')
-    async def choose(ctx, *choices: str):
-        """Chooses between multiple choices."""
-        await ctx.send(random.choice(choices))
-
-    @discord_bot.command(name='crt_ch', help='Создам канал) Только для админчиков)')
-    @commands.has_role('admin')
-    async def create_channel(context, channel_name):
-        guild = context.guild
-        existing_channel = discord.utils.get(guild.channels, name=channel_name)
-        if not existing_channel:
-            print(f'Создаю новый канал: {channel_name}')
-            await guild.create_text_channel(channel_name)
+        await discord_bot.process_commands(message)
 
     # TODO: Error handling
     # @discord_bot.event
@@ -79,27 +49,49 @@ def start_bot():
 
     @discord_bot.command()
     async def help(context):
-        emb = discord.Embed(title='Вот что я могу:', description='Я пока ещё многого не умею, но точно научусь!',
+        emb = discord.Embed(title='Вот что я могу:',
+                            description='Я пока ещё многого не умею, но точно научусь!',
                             colour=discord.Color.red())
-        # title - Жирный крупный текст (Заголовок) | description - Текст под заголовком | colour - Цвет полоски
-        emb.description += (f'\n{PREFIX}dice n m - брошу кубик c m-гранями n раз  \n'
-                            f'{PREFIX}hello - поприветствую тебя\n'
-                            f'{PREFIX}phrase - не хочешь крутую фразочку?)\n'
-                            f'{PREFIX}crt_ch name  - создам новый канал с именем name)\n'
-                            f'{PREFIX}test  - секретик)\n')
-        'Удачки!)'
 
         emb.set_author(name=context.author.name, icon_url=context.author.avatar_url)
 
         print(context.author.name)
         # Отображает: ctx.author.name - Имя отправителя, ctx.author.avatar_url - Аватар отправителя
-        emb.add_field(name='Все',
-                      value=f'`{PREFIX}crt_ch `'
-                            f' `{PREFIX}dice   `'
-                            f' `{PREFIX}hello`'
-                            f' `{PREFIX}help   ` '
-                            f'`{PREFIX}phrase ` '
-                            f'`{PREFIX}test    ` ',
+        emb.add_field(name='Управление каналом',
+                      value=f'`{PREFIX}move user channel`  - перемещю пользователя в указанный канал)\n'
+                            f'`{PREFIX}crtc name`  - создам новый текстовый канал с именем name)\n'
+                            f'`{PREFIX}crvc name`  - создам новый голосовой канал с именем name)\n'                            
+                            f'`{PREFIX}create [v/t] name,name1...`  - создам сразу несколько голосовых'
+                            f' или текстовых каналов\n'
+                            f'`{PREFIX}createm [v/t] name [start_num end_num]` - создам сразу несколько голосовых'
+                            f' или текстовых каналов с приписками справа)\n'
+                            f'`{PREFIX}deletem name [start_num end_num]`  - удалю каналы с приписками справа)\n'
+                            f'`{PREFIX}del name`  - удалю канал с именем name)\n'
+                            f'`{PREFIX}rename member_name new` - сменю ник\n'
+                            f'`{PREFIX}kick member_name` - выкину нехорошего человека с сервера\n'
+                            f'`{PREFIX}ban member_name` - забаню нехорошего человека\n'
+                            f'`{PREFIX}unban member_name` - разбаню того, кто это заслужил\n',
+                      inline=False)
+        emb.add_field(name='Текстовые',
+                      value=f'`{PREFIX}hello` - поприветствую тебя\n'
+                            f'`{PREFIX}phrase` - не хочешь крутую фразочку?)\n'
+                            f'`{PREFIX}here`  - отвечу тебе, если я тут)\n'
+                            f'`{PREFIX}fact` - напечатаю случайный факт из интернета\n'
+                            f'`{PREFIX}fuc`, `{PREFIX}f`  - хочешь факулечку?)\n'
+                            f'`{PREFIX}me`, `{PREFIX}info`  - расскажу тебе факт обо мне\n',
+                      inline=False)
+        emb.add_field(name='Развлекающие',
+                      value=f'`{PREFIX}dice n m` - брошу кубик c m-гранями n раз  \n'
+                            f'`{PREFIX}choose c1 c2 ...` - выберу один из вариантов \n',
+                      inline=False)
+        emb.add_field(name='Голосовые',
+                      value=f'`{PREFIX}join` - подключусь к голосовому каналу\n'
+                            f' `{PREFIX}leave` - покину голосовой канал\n'
+                            f' `{PREFIX}play file` - проиграю файл, если он у меня есть)\n'
+                            f' `{PREFIX}yt link` - проиграю файл по ссылке(с предзагрузкой)\n'
+                            f' `{PREFIX}stream link`- проиграю файл по ссылке\n'
+                            f' `{PREFIX}stop` - перестану проигрывать музыку\n'
+                            f' `{PREFIX}volume level` - поменяю уровень громкости\n',
                       inline=False)
 
         # Отображаемый блок текста. name - Жирный крупный текст | value - обычный текст под "name"
@@ -123,29 +115,15 @@ def start_bot():
 
         print(f'[Logs:info] Справка по командам была успешно выведена | {PREFIX}help ')
 
-    @discord_bot.command(pass_context=True)
-    @commands.has_role('admin')
-    async def chnick(ctx, member: discord.Member, nick):
-        await member.edit(nick=nick)
-        await ctx.send(f'Nickname was changed for {member.mention} ')
-
-    @discord_bot.event
-    async def on_message(message):
-        if message.author == discord_bot.user:
-            return
-        if (
-                ("Lyna" in message.content) or
-                ("Лина" in message.content)
-
-        ):
-            await message.channel.send('А вот и я=)')
-
-        await discord_bot.process_commands(message)
-
+    # Adding functionality as  cogs
+    discord_bot.add_cog(messaging_cog.MessagingCog(discord_bot))
+    discord_bot.add_cog(entertainment_cog.EntertainmentCog(discord_bot))
+    discord_bot.add_cog(voice_cog.VoiceCog(discord_bot))
+    discord_bot.add_cog(manage_cog.ManageCog(discord_bot))
     discord_bot.run(TOKEN)
 
 
 start_bot()
 
 # if __name__ == '__main__':
-#     start_bot()
+#     start_bot()в23выв
