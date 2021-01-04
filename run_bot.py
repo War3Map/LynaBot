@@ -15,6 +15,7 @@ settings = {
 
 TOKEN = os.getenv("TOKEN")
 
+
 PREFIX = settings['prefix']
 
 
@@ -82,7 +83,9 @@ def start_bot():
                       inline=False)
         emb.add_field(name='Развлекающие',
                       value=f'`{PREFIX}dice n m` - брошу кубик c m-гранями n раз  \n'
-                            f'`{PREFIX}choose c1 c2 ...` - выберу один из вариантов \n',
+                            f'`{PREFIX}choose c1 c2 ...` - выберу один из вариантов \n'
+                            f'`{PREFIX}rand`, `{PREFIX}r`, `{PREFIX}random [startn endn]`'
+                            f'- выберу случайное число \n',
                       inline=False)
         emb.add_field(name='Голосовые',
                       value=f'`{PREFIX}join` - подключусь к голосовому каналу\n'
