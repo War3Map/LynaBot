@@ -1,9 +1,13 @@
+import asyncio
 from datetime import datetime, timedelta
+from collections import deque
 
 import discord
 from discord.ext import commands
 
 from player import YTDLSource
+
+event_loop = asyncio.get_event_loop()
 
 
 def get_duration_str(duration_in_seconds):
@@ -18,14 +22,24 @@ def get_duration_str(duration_in_seconds):
     return duration_str
 
 
+def play_next(voice_cog, context, url):
+    context.voice_client.stop()
+    voice_cog.player = None
+    print("Next cause")
+    asyncio.run_coroutine_threadsafe(voice_cog.ppl(context, url), event_loop)
+
+
 class VoiceCog(commands.Cog):
     """
     Voice commands for bot
     """
     discord_bot = None
+    player = None
+    playlist = None
 
     def __init__(self, bot):
         self.discord_bot = bot
+        self.playlist = deque()
 
     @commands.command()
     async def join(self, context):
@@ -74,12 +88,55 @@ class VoiceCog(commands.Cog):
                            ))
 
     @commands.command()
+    async def ppl(self, context, url):
+        """Plays from a url (almost anything youtube_dl supports)"""
+
+        if url is not None:
+            self.playlist.appendleft(url)
+        print(self.playlist)
+
+        cur_url = ""
+        # if len(self.playlist) > 0:
+
+        if self.player is None:
+            print("starting")
+            cur_url = self.playlist.popleft()
+            self.player = await YTDLSource.from_url(cur_url, loop=self.discord_bot.loop)
+            context.voice_client.play(self.player, after=lambda e: play_next(self, context, None))
+        elif context.voice_client.is_playing:
+            print("adding")
+            await context.send('Добавлено в очередь {url}'.format(
+                url=url
+            ))
+        else:
+            print("here")
+            cur_url = self.playlist.popleft()
+            self.player = await YTDLSource.from_url(cur_url, loop=self.discord_bot.loop)
+            context.voice_client.play(self.player, after=lambda e: play_next(self, context, cur_url))
+
+        duration_str = get_duration_str(int(self.player.data.get('duration')))
+        print(self.playlist)
+        await context.send('Сейчас проигрывается: {}'
+                           ' продолжительность - {}'.format(
+                            self.player .title,
+                            duration_str
+                           ))
+
+    @commands.command()
+    async def list(self, context):
+        """Sends content of playlist"""
+        playlist_content = "\n".join(self.playlist)
+        await context.send('Содержимое плейлиста: {}'.format(
+                            playlist_content
+                           ))
+
+    @commands.command()
     async def stream(self, context, *, url):
         """Streams from a url (same as yt, but doesn't predownload)"""
 
         async with context.typing():
             player = await YTDLSource.from_url(url, loop=self.discord_bot.loop, stream=True)
-            player.data
+
             duration_str = get_duration_str(int(player.data.get('duration')))
 
             context.voice_client.play(player,
@@ -87,9 +144,9 @@ class VoiceCog(commands.Cog):
 
         await context.send('Сейчас проигрывается: {}'
                            ' продолжительность - {}'.format(
-            player.title,
-            duration_str
-        ))
+                            player.title,
+                            duration_str
+                            ))
 
     @commands.command()
     async def stop(self, context):

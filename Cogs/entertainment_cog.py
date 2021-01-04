@@ -26,6 +26,12 @@ class EntertainmentCog(commands.Cog):
         """Chooses between multiple choices."""
         await context.send(random.choice(choices))
 
+    @commands.command(aliases=['rand', 'r'],
+                      description='For when you wanna settle the score some other way')
+    async def random(self, context, start_num=0, end_num=100):
+        """Generates random number from start_num to end_num(exclude)"""
+        await context.send(random.randint(start_num, end_num))
+
     @commands.Cog.listener()
     async def on_message(self, message):
         pass
