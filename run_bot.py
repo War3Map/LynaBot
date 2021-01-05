@@ -20,7 +20,7 @@ PREFIX = settings['prefix']
 
 
 def start_bot():
-    discord_bot = commands.Bot(command_prefix='!', help_command=None)
+    discord_bot = commands.Bot(command_prefix='!', help_command=None, case_insensitive=True)
 
     # print(f"The bot {settings['bot']} is started")
 
