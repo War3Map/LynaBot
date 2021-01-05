@@ -104,11 +104,17 @@ class MessagingCog(commands.Cog):
         await context.send(random.choice(FUCKS_LIST))
 
     @commands.command(aliases=['me', 'about'])
-    @commands.has_role('admin')
     async def info(self, context):
         """ Writes Info About Bot"""
         response = random.choice(ABOUT)
         await context.send(response)
+
+    @commands.command(aliases=['presence', 'status'])
+    @commands.has_role('admin')
+    async def change_status(self, context, message):
+        """ Changes bot status"""
+        game = discord.Game(message)
+        await self.discord_bot.change_presence(status=discord.Status.online, activity=game)
 
     @commands.Cog.listener()
     async def on_message(self, message):

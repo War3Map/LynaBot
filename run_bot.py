@@ -79,7 +79,9 @@ def start_bot():
                             f'`{PREFIX}here`  - отвечу тебе, если я тут)\n'
                             f'`{PREFIX}fact` - напечатаю случайный факт из интернета\n'
                             f'`{PREFIX}fuc`, `{PREFIX}f`  - хочешь факулечку?)\n'
-                            f'`{PREFIX}me`, `{PREFIX}info`  - расскажу тебе факт обо мне\n',
+                            f'`{PREFIX}me`, `{PREFIX}info`  - расскажу тебе факт обо мне\n'
+                            f'`{PREFIX}status`, `{PREFIX}presence new`  - изменю свой статус на новый (для админов)\n'
+                      ,
                       inline=False)
         emb.add_field(name='Развлекающие',
                       value=f'`{PREFIX}dice n m` - брошу кубик c m-гранями n раз  \n'
