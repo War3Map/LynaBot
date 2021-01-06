@@ -61,7 +61,7 @@ def parse_html_to_fact():
     searched_result = re.search(pattern, content)
     message_list = searched_result.group(0).split(">")
     if len(message_list) > 4:
-        message = message_list[3].split("<")[0]
+        message = message_list[3].split(">wa")[0]
     return message
 
 

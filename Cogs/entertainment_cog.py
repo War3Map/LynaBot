@@ -1,7 +1,43 @@
+import codecs
 import random
+import re
 
 import discord
+import requests
+
 from discord.ext import commands
+from bs4 import BeautifulSoup
+
+
+ANIME_IMAGE_URL = 'https://animepicsx.net/random'
+
+
+def get_anime_image():
+    message = "К сожалению мне не удалось найти ничего интересного"
+
+    response = requests.get(ANIME_IMAGE_URL)
+    soup = BeautifulSoup(response.text, 'lxml')
+    res = soup.find_all("a", class_="_random_pic")
+    if res is None:
+        return message
+    # print(res)
+    # print(str(res))
+
+    soup = BeautifulSoup(str(res), 'lxml')
+    res = soup.find_all("img")
+    for image in res:
+        message = image['src']
+
+    # way 2
+    # src_element = re.search('src="(.*?)"', str(res))
+    # src_parts = src_element.group(0).split('"')
+    # if len(src_parts) == 3:
+    #     message = src_parts[1]
+
+    # print(res)
+    # content = codecs.decode(response.content, 'UTF-8')
+
+    return message
 
 
 class EntertainmentCog(commands.Cog):
@@ -31,6 +67,12 @@ class EntertainmentCog(commands.Cog):
     async def random(self, context, start_num=0, end_num=100):
         """Generates random number from start_num to end_num(exclude)"""
         await context.send(random.randint(start_num, end_num))
+
+    @commands.command(aliases=['img', 'im', 'i'],
+                      description='Отправлю случайную картинку')
+    async def image(self, context, start_num=0, end_num=100):
+        """Gets random image from ANIME_IMAGE_URL"""
+        await context.send(get_anime_image())
 
     @commands.Cog.listener()
     async def on_message(self, message):

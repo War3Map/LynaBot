@@ -86,8 +86,10 @@ def start_bot():
         emb.add_field(name='Развлекающие',
                       value=f'`{PREFIX}dice n m` - брошу кубик c m-гранями n раз  \n'
                             f'`{PREFIX}choose c1 c2 ...` - выберу один из вариантов \n'
-                            f'`{PREFIX}rand`, `{PREFIX}r`, `{PREFIX}random [startn endn]`'
-                            f'- выберу случайное число \n',
+                            f'`{PREFIX}rand`, `{PREFIX}r`, `{PREFIX}random [startn endn]`'                            
+                            '- выберу случайное число \n'
+                            f'`{PREFIX}image`, `{PREFIX}img`, `{PREFIX}im`, `{PREFIX}i`'
+                            ' - отправлю случайную аниме-картинку из интернета',
                       inline=False)
         emb.add_field(name='Голосовые',
                       value=f'`{PREFIX}join` - подключусь к голосовому каналу\n'
