@@ -11,6 +11,28 @@ from bs4 import BeautifulSoup
 
 ANIME_IMAGE_URL = 'https://animepicsx.net/random'
 
+RANDOM_IMAGE_SITE = 'https://www.generatormix.com'
+GIRL_URL = 'https://www.generatormix.com/random-beautiful-women'
+RIMAGE_URL = 'https://www.generatormix.com/random-image-generator'
+
+
+def get_image():
+    message = "К сожалению мне не удалось найти ничего интересного"
+
+    response = requests.get(RIMAGE_URL)
+
+    soup = BeautifulSoup(response.text, 'lxml')
+    res = soup.find_all("img", class_="lazy thumbnail")
+    
+    if res is None:
+        return message
+
+    for image in res:
+        message = image['data-src']
+        break
+
+    return message
+
 
 def get_anime_image():
     message = "К сожалению мне не удалось найти ничего интересного"
@@ -20,8 +42,6 @@ def get_anime_image():
     res = soup.find_all("a", class_="_random_pic")
     if res is None:
         return message
-    # print(res)
-    # print(str(res))
 
     soup = BeautifulSoup(str(res), 'lxml')
     res = soup.find_all("img")
@@ -38,6 +58,24 @@ def get_anime_image():
     # content = codecs.decode(response.content, 'UTF-8')
 
     return message
+
+
+def get_girl_image():
+    message = "К сожалению мне не удалось найти ничего интересного"
+
+    response = requests.get(GIRL_URL)
+    soup = BeautifulSoup(response.text, 'lxml')
+    res = soup.find_all("img", class_='lazy thumbnail aspect-tall-contain')
+    if res is None:
+        return message
+
+    image_list = list()
+    for image in res:
+        # print(str(image))
+        image_list.append(image['data-src'])
+    message = random.choice(image_list)
+
+    return RANDOM_IMAGE_SITE + message
 
 
 class EntertainmentCog(commands.Cog):
@@ -69,10 +107,23 @@ class EntertainmentCog(commands.Cog):
         await context.send(random.randint(start_num, end_num))
 
     @commands.command(aliases=['img', 'im', 'i'],
-                      description='Отправлю случайную картинку')
+                      description='Отправлю случайную аниме картинку')
     async def image(self, context, start_num=0, end_num=100):
+        """Gets random image from RIMAGE_URL"""
+        await context.send(get_image())
+
+    @commands.command(aliases=['a', 'anime', 'waifu', 'w'],
+                      description='Отправлю случайную аниме картинку c девушкой')
+    async def anime_image(self, context, start_num=0, end_num=100):
         """Gets random image from ANIME_IMAGE_URL"""
         await context.send(get_anime_image())
+
+    @commands.command(name="girl",
+                      aliases=['g'],
+                      description='Отправлю случайную картинку')
+    async def girl_image(self, context, start_num=0, end_num=100):
+        """Gets random image from GIRL_URL"""
+        await context.send(get_girl_image())
 
     @commands.Cog.listener()
     async def on_message(self, message):
