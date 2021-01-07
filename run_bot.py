@@ -89,7 +89,12 @@ def start_bot():
                             f'`{PREFIX}rand`, `{PREFIX}r`, `{PREFIX}random [startn endn]`'                            
                             '- выберу случайное число \n'
                             f'`{PREFIX}image`, `{PREFIX}img`, `{PREFIX}im`, `{PREFIX}i`'
-                            ' - отправлю случайную аниме-картинку из интернета',
+                            ' - отправлю случайную картинку из интернета\n'
+                            f'`{PREFIX}girl`, `{PREFIX}g`'
+                            ' - отправлю случайную картинку девушки из интернета\n'
+                            f'`{PREFIX}anime`, `{PREFIX}a`'
+                            ' - отправлю случайную картинку аниме-девушки из интернета\n'
+                      ,
                       inline=False)
         emb.add_field(name='Голосовые',
                       value=f'`{PREFIX}join` - подключусь к голосовому каналу\n'
