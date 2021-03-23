@@ -1,12 +1,16 @@
-import codecs
+import os
 import random
 from random import randint
 
+
 import discord
-import requests
 from discord.ext import commands
 
-import re
+
+from selenium import webdriver
+
+
+from bs4 import BeautifulSoup
 
 GREETINGS_DIC = {
     0: 'Привет, {name}!',
@@ -45,24 +49,42 @@ FUCKS_LIST = [
     r'https://tenor.com/view/middlefinger-ryan-stiles-pocket-whose-gif-3863927',
     r'https://tenor.com/view/fuck-you-middle-finger-flipping-off-flip-off-jack-nicholson-gif-5326673',
     r'https://tenor.com/view/middle-finger-the-bird-flip-the-bird-flipping-the-bird-fuck-you-gif-5633646',
+    r'https://tenor.com/view/baby-girl-middle-finger-mood-screw-you-leave-me-alone-gif-10174031',
+    r'https://tenor.com/view/fuck-you-fuck-middle-finger-gif-14825969',
+    r'https://tenor.com/view/dragonball-fuck-off-middle-finger-dirty-finger-fuck-you-gif-7214436',
+    r'https://tenor.com/view/fuck-you-flip-the-bird-gif-5847111',
+    r'https://tenor.com/view/oniai-anastasia-nasuhara-anime-middle-finger-flip-off-gif-15308749',
+    r'https://tenor.com/view/homer-middle-finger-the-simpsons-fuck-you-gif-11674252',
     r'.!.',
-
-
 ]
 
-FACT_SITE = 'https://randstuff.ru/fact/'
+FACT_SITE = 'http://freegenerator.ru/fact'
+
+
+QUOTE_SITE = "https://randomall.ru/custom/gen/2423"
 
 
 def parse_html_to_fact():
     message = "К сожалению мне не удалось найти ничего интересного"
-    response = requests.get(FACT_SITE)
-    pattern = r"""<table[^>]*?>(.*?)<\/td>"""
-    content = codecs.decode(response.content, 'UTF-8')
-    searched_result = re.search(pattern, content)
-    message_list = searched_result.group(0).split(">")
-    if len(message_list) > 4:
-        message = message_list[3].split(">wa")[0]
+
+    driver = webdriver.Opera()
+    driver.minimize_window()
+    driver.get(FACT_SITE)
+    soup = BeautifulSoup(driver.page_source, 'html.parser')
+    driver.quit()
+    # soup = BeautifulSoup(webpage, 'lxml')
+    res = soup.find("div", class_="col", id="main",  text=True)
+    if res is None:
+        return message
+    message = res.text
+    # for val in res:
+    #     message = val.get_text()
+
     return message
+
+
+def parse_html_to_quote():
+    pass
 
 
 class MessagingCog(commands.Cog):
@@ -95,7 +117,14 @@ class MessagingCog(commands.Cog):
     @commands.command(help="случайный факт из интернета")
     async def fact(self, context):
         """Prints random fact"""
+
         await context.send(parse_html_to_fact())
+                
+    @commands.command(help="цитата из интернета")
+    async def quote(self, context):
+        """Prints random quote"""
+
+        await context.send(parse_html_to_quote())
 
     @commands.command(aliases=['fac', 'f'],
                       help="отправлю факулечки")
