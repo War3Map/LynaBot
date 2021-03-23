@@ -3,11 +3,10 @@ import os
 import discord
 from discord.ext import commands
 
-import Cogs
-from Cogs import messaging_cog, entertainment_cog,\
+from Cogs import messaging_cog, entertainment_cog, \
     voice_cog, manage_cog
 
-settings = {
+SETTINGS = {
     'bot': 'Lyna',
     'id': 791651219529531402,
     'prefix': '!'
@@ -15,8 +14,7 @@ settings = {
 
 TOKEN = os.getenv("TOKEN")
 
-
-PREFIX = settings['prefix']
+PREFIX = SETTINGS['prefix']
 
 
 def start_bot():
@@ -61,7 +59,7 @@ def start_bot():
         emb.add_field(name='Управление каналом',
                       value=f'`{PREFIX}move user channel`  - перемещю пользователя в указанный канал)\n'
                             f'`{PREFIX}crtc name`  - создам новый текстовый канал с именем name)\n'
-                            f'`{PREFIX}crvc name`  - создам новый голосовой канал с именем name)\n'                            
+                            f'`{PREFIX}crvc name`  - создам новый голосовой канал с именем name)\n'
                             f'`{PREFIX}create [v/t] name,name1...`  - создам сразу несколько голосовых'
                             f' или текстовых каналов\n'
                             f'`{PREFIX}createm [v/t] name [start_num end_num]` - создам сразу несколько голосовых'
@@ -77,24 +75,23 @@ def start_bot():
                       value=f'`{PREFIX}hello` - поприветствую тебя\n'
                             f'`{PREFIX}phrase` - не хочешь крутую фразочку?)\n'
                             f'`{PREFIX}here`  - отвечу тебе, если я тут)\n'
-                            f'`{PREFIX}fact` - напечатаю случайный факт из интернета\n'
+                            f'`{PREFIX}fact` - отправлю случайный факт из интернета\n'
+                            f'`{PREFIX}quote` - отправлю цитату из интернета\n'
                             f'`{PREFIX}fuc`, `{PREFIX}f`  - хочешь факулечку?)\n'
                             f'`{PREFIX}me`, `{PREFIX}info`  - расскажу тебе факт обо мне\n'
-                            f'`{PREFIX}status`, `{PREFIX}presence new`  - изменю свой статус на новый (для админов)\n'
-                      ,
+                            f'`{PREFIX}status`, `{PREFIX}presence new`  - изменю свой статус на новый (для админов)\n',
                       inline=False)
         emb.add_field(name='Развлекающие',
                       value=f'`{PREFIX}dice n m` - брошу кубик c m-гранями n раз  \n'
                             f'`{PREFIX}choose c1 c2 ...` - выберу один из вариантов \n'
-                            f'`{PREFIX}rand`, `{PREFIX}r`, `{PREFIX}random [startn endn]`'                            
+                            f'`{PREFIX}rand`, `{PREFIX}r`, `{PREFIX}random [startn endn]`'
                             '- выберу случайное число \n'
                             f'`{PREFIX}image`, `{PREFIX}img`, `{PREFIX}im`, `{PREFIX}i`'
                             ' - отправлю случайную картинку из интернета\n'
                             f'`{PREFIX}girl`, `{PREFIX}g`'
                             ' - отправлю случайную картинку девушки из интернета\n'
                             f'`{PREFIX}anime`, `{PREFIX}a`'
-                            ' - отправлю случайную картинку аниме-девушки из интернета\n'
-                      ,
+                            ' - отправлю случайную картинку аниме-девушки из интернета\n',
                       inline=False)
         emb.add_field(name='Голосовые',
                       value=f'`{PREFIX}join` - подключусь к голосовому каналу\n'
