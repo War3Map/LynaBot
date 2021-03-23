@@ -23,6 +23,20 @@ def get_duration_str(duration_in_seconds):
 
 
 def play_next(voice_cog, context, url):
+    """
+    Stop the player and prepare to start new song
+
+    :param voice_cog: voice cog
+
+    :type voice_cog: VoiceCog
+
+    :param context: Message context
+
+    :param url: Next url to play
+
+    :type url: str
+
+    """
     context.voice_client.stop()
     voice_cog.player = None
     print("Next cause")
@@ -168,15 +182,15 @@ class VoiceCog(commands.Cog):
     @play.before_invoke
     @yt.before_invoke
     @stream.before_invoke
-    async def ensure_voice(self, ctx):
-        if ctx.voice_client is None:
-            if ctx.author.voice:
-                await ctx.author.voice.channel.connect()
+    async def ensure_voice(self, context):
+        if context.voice_client is None:
+            if context.author.voice:
+                await context.author.voice.channel.connect()
             else:
-                await ctx.send("Ты не подключен к голосовому каналу!")
+                await context.send("Ты не подключен к голосовому каналу!")
                 raise commands.CommandError("Author not connected to a voice channel.")
-        elif ctx.voice_client.is_playing():
-            ctx.voice_client.stop()
+        elif context.voice_client.is_playing():
+            context.voice_client.stop()
 
     @commands.Cog.listener()
     async def on_message(self, message):
