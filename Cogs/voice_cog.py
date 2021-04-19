@@ -34,7 +34,7 @@ def play_next(voice_cog, context, url):
 
     :param url: Next url to play
 
-    :type url: str
+    :type url: str or None
 
     """
     context.voice_client.stop()

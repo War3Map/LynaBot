@@ -20,10 +20,10 @@ FACT_URL = "https://randstuff.ru/fact/"
 QUOTE_URL = "https://citaty.info/random"
 
 
-def parse_from_html_test(parse_func, url):
+def parse_from_html_test(parse_func, url, params=None):
     message = "К сожалению мне не удалось найти ничего интересного"
 
-    response = requests.get(url, headers=HEADERS)
+    response = requests.get(url, headers=HEADERS, params=params)
 
     # search_result = get_fact_result(response)
     search_result = parse_func(response)
@@ -69,6 +69,19 @@ def get_fact2_result(response):
         return None
 
 
-print(parse_from_html_test(get_quote_result, QUOTE_URL))
-print(parse_from_html_test(get_fact_result, FACT_URL))
-print(parse_from_html_test(get_fact2_result, "http://webdiscover.ru/facts/"))
+def get_gif_test(response):
+    # print(response.text)
+    soup = BeautifulSoup(response.text, 'lxml')
+    try:
+        res = soup.find("div", class_="entry").findChild("img")
+        return res['src']
+    except Exception as ex:
+        print(ex)
+        return None
+
+
+# print(parse_from_html_test(get_quote_result, QUOTE_URL))
+# print(parse_from_html_test(get_fact_result, FACT_URL))
+# print(parse_from_html_test(get_fact2_result, "http://webdiscover.ru/facts/"))
+print(parse_from_html_test(get_gif_test, "https://xdgif.ru/random/"))
+

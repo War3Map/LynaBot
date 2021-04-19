@@ -130,22 +130,24 @@ class ManageCog(commands.Cog):
     @commands.has_permissions(kick_members=True)
     async def kick(self, ctx, member: discord.Member, reason=None):
         user = member.nick
+        ban_reason = reason if reason is not None else "Админ так сказал!"
         try:
             await member.kick()
-            await ctx.send(f'{user} вылетел из сервера!')
+            await ctx.send(f'{user} вылетел из сервера! Причина: {ban_reason}')
         except Exception as ex:
-            print("Ошибка при удалении".ex)
+            print("Ошибка при удалении", ex)
             await ctx.send('Я не могу этого сделать!')
 
     @commands.command()
     @commands.has_permissions(ban_members=True)
     async def ban(self, ctx, member: discord.Member, reason=None):
         user = member.name
+        ban_reason = reason if reason is not None else "Админ так сказал!"
         try:
             await member.ban()
-            await ctx.send(f'{user} был забанен!')
+            await ctx.send(f'{user} был забанен! Причина: {ban_reason}')
         except Exception as ex:
-            print("Ошибка при бане".ex)
+            print("Ошибка при бане", ex)
             await ctx.send('Я не могу этого сделать!')
 
     @commands.command()
@@ -154,17 +156,17 @@ class ManageCog(commands.Cog):
 
         banned_users = await ctx.guild.bans()
         # member_name, member_discriminator = member.split('#')
-
+        user = None
+        ban_reason = reason if reason is not None else "Админ так сказал!"
         for ban_entry in banned_users:
             user = ban_entry.user
             if user.name == member_name:
                 break
-
         try:
             await ctx.guild.unban(user)
-            await ctx.send(f"{user} был разбанен!")
+            await ctx.send(f"{user} был разбанен! Причина: {ban_reason}")
         except Exception as ex:
-            print("Ошибка при разбане".ex)
+            print("Ошибка при разбане", ex)
             await ctx.send('Я не могу этого сделать!')
 
     @commands.command()
@@ -182,4 +184,3 @@ class ManageCog(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message):
         pass
-

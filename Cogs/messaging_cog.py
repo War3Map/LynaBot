@@ -1,14 +1,10 @@
-import os
 import random
 from random import randint
-
 
 import discord
 from discord.ext import commands
 
-
 from selenium import webdriver
-
 
 from bs4 import BeautifulSoup
 
