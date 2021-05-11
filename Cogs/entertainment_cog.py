@@ -124,8 +124,8 @@ class EntertainmentCog(commands.Cog):
         """Gets random image from ANIME_IMAGE_URL"""
         await context.send(get_anime_image())
 
-    @commands.command(aliases=['gif', 'giff', 'gf'],
-                      description='Отправлю случайную аниме картинку')
+    @commands.command(aliases=['giff', 'gf'],
+                      description='Отправлю случайную gif картинку')
     async def gif(self, context):
         """Gets random gif from GIF_URL"""
         await context.send(get_gif())
