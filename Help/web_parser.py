@@ -84,4 +84,3 @@ def get_gif_test(response):
 # print(parse_from_html_test(get_fact_result, FACT_URL))
 # print(parse_from_html_test(get_fact2_result, "http://webdiscover.ru/facts/"))
 print(parse_from_html_test(get_gif_test, "https://xdgif.ru/random/"))
-

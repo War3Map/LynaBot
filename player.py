@@ -3,7 +3,6 @@ import asyncio
 import discord
 import youtube_dl
 
-from discord.ext import commands
 
 # Suppress noise about console usage from errors
 youtube_dl.utils.bug_reports_message = lambda: ''
@@ -31,6 +30,20 @@ ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 
 
 class YTDLSource(discord.PCMVolumeTransformer):
+    """
+
+    Attributes:
+
+        data(dict): loaded song data
+
+        title(str): song name
+
+        url(str): source song url
+
+    Methods:
+        from_url(): gets data from url
+
+    """
     def __init__(self, source, *, data, volume=0.5):
         super().__init__(source, volume)
 
@@ -41,6 +54,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
     @classmethod
     async def from_url(cls, url, *, loop=None, stream=False):
+        """Loading song from url"""
         loop = loop or asyncio.get_event_loop()
         data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream))
 

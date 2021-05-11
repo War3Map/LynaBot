@@ -6,8 +6,10 @@ from discord.ext import commands
 from Cogs import messaging_cog, entertainment_cog, \
     voice_cog, manage_cog
 
+
+# TODO: Сохранить в json и загружать из json
 SETTINGS = {
-    'bot': 'Lyna',
+    'bot_name': 'Lyna',
     'id': 791651219529531402,
     'prefix': '!'
 }
@@ -16,11 +18,14 @@ TOKEN = os.getenv("TOKEN")
 
 PREFIX = SETTINGS['prefix']
 
+# TODO: настроить логирование
+
 
 def start_bot():
+    """
+    Starts a bot.
+    """
     discord_bot = commands.Bot(command_prefix='!', help_command=None, case_insensitive=True)
-
-    # print(f"The bot {settings['bot']} is started")
 
     @discord_bot.event
     async def on_ready():
@@ -95,12 +100,20 @@ def start_bot():
                       inline=False)
         emb.add_field(name='Голосовые',
                       value=f'`{PREFIX}join` - подключусь к голосовому каналу\n'
-                            f' `{PREFIX}leave` - покину голосовой канал\n'
-                            f' `{PREFIX}play file` - проиграю файл, если он у меня есть)\n'
-                            f' `{PREFIX}yt link` - проиграю файл по ссылке(с предзагрузкой)\n'
-                            f' `{PREFIX}stream link`- проиграю файл по ссылке\n'
-                            f' `{PREFIX}stop` - перестану проигрывать музыку\n'
-                            f' `{PREFIX}volume level` - поменяю уровень громкости\n',
+                            f'`{PREFIX}leave` - покину голосовой канал\n'
+                            f'`{PREFIX}playf file`, `{PREFIX}play_file file`,'
+                            f' `{PREFIX}plf file` - проиграю файл, если он у меня есть)\n'
+                            f'`{PREFIX}playnow link`, `{PREFIX}play_now link`,'
+                            f' `{PREFIX}playn link`, `{PREFIX}pln link` - ТОЛЬКО ДЛЯ АДМИНОВ:'
+                            f' проиграю файл по ссылке(с предзагрузкой)\n'
+                            f'`{PREFIX}stream link`, `{PREFIX}strm link`- ТОЛЬКО ДЛЯ АДМИНОВ:'
+                            f' проиграю файл по ссылке\n'
+                            f'`{PREFIX}play link`, `{PREFIX}addp link`,'
+                            f' `{PREFIX}pladd link`, `{PREFIX}ppl link` - добавлю файл в плейлист'
+                            f' и проиграю его когда прийдёт его время)\n'
+                            f'`{PREFIX}list`, `{PREFIX}pls` - покажу содержимое плейлиста)\n'
+                            f'`{PREFIX}stop` - перестану проигрывать музыку\n'
+                            f'`{PREFIX}volume level` - поменяю уровень громкости\n',
                       inline=False)
 
         # Отображаемый блок текста. name - Жирный крупный текст | value - обычный текст под "name"
@@ -130,9 +143,10 @@ def start_bot():
     discord_bot.add_cog(voice_cog.VoiceCog(discord_bot))
     discord_bot.add_cog(manage_cog.ManageCog(discord_bot))
     discord_bot.run(TOKEN)
+    print(f"Бот {SETTINGS['bot_name']}:{SETTINGS['id']} запущен")
 
 
 start_bot()
 
 # if __name__ == '__main__':
-#     start_bot()в23выв
+#     start_bot()
