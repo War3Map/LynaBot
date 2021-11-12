@@ -7,6 +7,9 @@ from discord.ext import commands
 from discord.ext import tasks
 
 from player import YTDLSource
+from threading import Timer
+from threading import Thread
+
 
 event_loop = asyncio.get_event_loop()
 
@@ -23,33 +26,6 @@ def get_duration_str(duration_in_seconds):
     return duration_str
 
 
-def play_next(voice_cog, context, url):
-    """
-    Stop the player and prepare to start new song
-
-    :param voice_cog: voice cog
-
-    :type voice_cog: VoiceCog
-
-    :param context: Message context
-
-    :param url: Next url to play
-
-    :type url: str or None
-
-    """
-    context.voice_client.stop()
-    voice_cog.player = None
-    voice_cog.duration_song = int(voice_cog.player.data.get('duration'))
-
-
-@tasks.loop(seconds=10.0)
-async def run_new_song(self):
-
-    print("Next cause")
-    asyncio.run_coroutine_threadsafe(voice_cog.play_from_playlist(context, url), event_loop)
-
-
 class VoiceCog(commands.Cog):
     """
     Voice commands for bot
@@ -62,6 +38,9 @@ class VoiceCog(commands.Cog):
         self.discord_bot = bot
         self.playlist = deque()
         self.playing_playlist = False
+        self.duration_song = 0
+        self.playlist_timer = None
+        self.current_song = None
 
     @commands.command()
     async def join(self, context):
@@ -106,9 +85,70 @@ class VoiceCog(commands.Cog):
 
         await context.send('Сейчас проигрывается: {}'
                            ' продолжительность - {}'.format(
-                            player.title,
-                            duration_str
-                           ))
+            player.title,
+            duration_str
+        ))
+
+    # @tasks.loop(seconds=self.duration_song)
+    # async def run_new_song(self):
+    #
+    #     print("Next cause")
+    #     self.player = None
+    #     asyncio.run_coroutine_threadsafe(voice_cog.play_from_playlist(context, url), event_loop)
+
+    def stop_song(self, context):
+        print("Таймер тик!")
+        if len(self.playlist) == 0:
+            print("Плейлист закончен!")
+            self.playing_playlist = False
+            self.player = None
+        else:
+            asyncio.run_coroutine_threadsafe(self.play_next(context), event_loop)
+            # self.play()
+
+        self.playlist_timer.cancel()
+
+    async def play_song(self, client):
+        await client.play(self.player)
+
+    async def play_next(self, context):
+        """
+        Stop the player and prepare to start new song
+
+        :param context: Message context
+
+        :param url: Next url to play
+
+        :type url: str or None
+
+        """
+        print("запуск следующей композиции")
+        current_url = self.playlist.popleft() if self.playlist else None
+
+        if current_url is not None:
+            # asyncio.run_coroutine_threadsafe(self.play_from_playlist(context, new_url), event_loop)
+            print(f"Starting play song at url {current_url}")
+            self.player = await YTDLSource.from_url(current_url, loop=self.discord_bot.loop)
+            self.duration_song = int(self.player.data.get('duration'))
+            await context.send(f'Сейчас проигрывается: {self.player.title}'
+                               f' продолжительность - {self.duration_song} c')
+            self.playing_playlist = True
+            # asyncio.create_task()
+
+            # context.voice_client.play(self.player)
+
+            # asyncio.create_task(self.play_song(context.voice_client))
+
+
+
+
+            self.playlist_timer = Timer(self.duration_song,
+                                        self.stop_song,
+                                        args=[context])
+            self.playlist_timer.start()
+            print("Таймер запущен")
+
+        # self.run_new_song.start()
 
     @commands.command(aliases=['play', 'addp', 'pladd', 'ppl'])
     async def play_from_playlist(self, context, url):
@@ -116,47 +156,18 @@ class VoiceCog(commands.Cog):
 
         if url is not None:
             self.playlist.appendleft(url)
-        # print(self.playlist)
 
-        if self.playing_playlist:
-            print(f"Adding to queue {url}")
-            print(f"Playlist: {self.playlist}")
-            await context.send(f'Добавлено в очередь {url}')
-        elif self.player is None:
-            print(f"Starting play song at url {url}")
-            cur_url = self.playlist.popleft()
-            self.player = await YTDLSource.from_url(cur_url, loop=self.discord_bot.loop)
-            context.voice_client.play(self.player, after=lambda e: play_next(self, context, None))
-
-
-        cur_url = ""
-        # if len(self.playlist) > 0:
-
-        # if self.player is None:
-        #     print(f"Starting play song at url {url}")
-        #     cur_url = self.playlist.popleft()
-        #     self.player = await YTDLSource.from_url(cur_url, loop=self.discord_bot.loop)
-        #     context.voice_client.play(self.player, after=lambda e: play_next(self, context, None))
-        # elif context.voice_client.is_playing:
-        #     print(f"Adding to queue {url}")
-        #     print(f"Playlist: {self.playlist}")
-        #     await context.send('Добавлено в очередь {url}'.format(
-        #         url=url
-        #     ))
-        #     duration_str = get_duration_str(int(self.player.data.get('duration')))
-        #
-        #     await context.send(f'Сейчас проигрывается: {self.player.title}'
-        #                        f' продолжительность - {duration_str}')
-        # else:
-        #     cur_url = self.playlist.popleft()
-        #     print(f"Playing song at url {cur_url}")
-        #     self.player = await YTDLSource.from_url(cur_url, loop=self.discord_bot.loop)
-        #     context.voice_client.play(self.player, after=lambda e: play_next(self, context, cur_url))
+        print(f"Adding to queue {url}")
+        print(f"Playlist: {self.playlist}")
+        await context.send(f'Добавлено в очередь {url}')
+        if not self.playing_playlist:
+            print("Запуск проигрывания ")
+            await self.play_next(context)
 
     @commands.command(aliases=['pls', ])
     async def list(self, context):
         """Sends content of playlist"""
-        playlist_content = "\n".join(self.playlist)
+        playlist_content = "\n".join(self.playlist) if not self.playlist else "Пусто!"
         await context.send(f'Содержимое плейлиста: {playlist_content}')
 
     @commands.command(aliases=['сls', ])
@@ -191,7 +202,7 @@ class VoiceCog(commands.Cog):
             context.voice_client.stop()
 
     @commands.command()
-    async def volume(self,  ctx, volume_val: int):
+    async def volume(self, ctx, volume_val: int):
         """Changes the player's volume"""
 
         if ctx.voice_client is None:
@@ -217,3 +228,29 @@ class VoiceCog(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message):
         pass
+
+    # @commands.command(aliases=['play', 'addp', 'pladd', 'ppl'])
+    # async def old_playlist(self, context, url):
+        # cur_url = ""
+        # if len(self.playlist) > 0:
+
+        # if self.player is None:
+        #     print(f"Starting play song at url {url}")
+        #     cur_url = self.playlist.popleft()
+        #     self.player = await YTDLSource.from_url(cur_url, loop=self.discord_bot.loop)
+        #     context.voice_client.play(self.player, after=lambda e: play_next(self, context, None))
+        # elif context.voice_client.is_playing:
+        #     print(f"Adding to queue {url}")
+        #     print(f"Playlist: {self.playlist}")
+        #     await context.send('Добавлено в очередь {url}'.format(
+        #         url=url
+        #     ))
+        #     duration_str = get_duration_str(int(self.player.data.get('duration')))
+        #
+        #     await context.send(f'Сейчас проигрывается: {self.player.title}'
+        #                        f' продолжительность - {duration_str}')
+        # else:
+        #     cur_url = self.playlist.popleft()
+        #     print(f"Playing song at url {cur_url}")
+        #     self.player = await YTDLSource.from_url(cur_url, loop=self.discord_bot.loop)
+        #     context.voice_client.play(self.player, after=lambda e: play_next(self, context, cur_url))
