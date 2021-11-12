@@ -139,3 +139,6 @@ dmypy.json
 
 # executables
 *.exe
+
+# pycharm projects
+/idea/
