@@ -3,6 +3,7 @@ Lyna Bot for Discord
 
 # Installation
 
+- place ffmpeg into tools folder
 ```
 pip install (path to requirements.txt)
 ```
