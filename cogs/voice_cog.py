@@ -4,12 +4,9 @@ from collections import deque
 
 import discord
 from discord.ext import commands
-from discord.ext import tasks
 
-from player import YTDLSource
+from additional.player import YTDLSource
 from threading import Timer
-from threading import Thread
-
 
 event_loop = asyncio.get_event_loop()
 

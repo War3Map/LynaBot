@@ -3,7 +3,7 @@ import os
 import discord
 from discord.ext import commands
 
-from Cogs import messaging_cog, entertainment_cog, \
+from cogs import messaging_cog, entertainment_cog, \
     voice_cog, manage_cog
 
 

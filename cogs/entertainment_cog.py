@@ -8,7 +8,7 @@ from discord.ext import commands
 from bs4 import BeautifulSoup
 
 
-from Help.web_parser import parse_from_html_test, get_gif_test
+from additional.web_parser import parse_from_html_test, get_gif_test
 
 ANIME_IMAGE_URL = 'https://animepicsx.net/random'
 
