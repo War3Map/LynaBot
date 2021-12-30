@@ -128,9 +128,10 @@ class MessagingCog(commands.Cog):
 
     @commands.command(aliases=['fac', 'f'],
                       help="отправлю факулечки")
-    async def fuc(self, context):
+    async def fuc(self, context, count=1):
         """Sends a fuck sign gif"""
-        await context.send(random.choice(FUCKS_LIST))
+        for _ in range(count):
+            await context.send(random.choice(FUCKS_LIST))
 
     @commands.command(aliases=['me', 'about'])
     async def info(self, context):
