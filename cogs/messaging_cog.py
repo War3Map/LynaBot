@@ -91,6 +91,7 @@ class MessagingCog(commands.Cog):
 
     def __init__(self, bot):
         self.discord_bot = bot
+        a = 0
 
     @commands.command()
     async def here(self, context):

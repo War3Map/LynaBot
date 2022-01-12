@@ -1,22 +1,24 @@
 import os
+import logging
+
+from random import choice
 
 import discord
-from discord.ext import commands
+import discord.ext.commands
 
-from cogs import messaging_cog, entertainment_cog, \
-    voice_cog, manage_cog
+from cogs import (
+    messaging_cog,
+    entertainment_cog,
+    voice_cog,
+    manage_cog
+)
 
+import additional.config_loader
+from additional.config_loader import get_setting
 
 # TODO: Сохранить в json и загружать из json
-SETTINGS = {
-    'bot_name': 'Lyna',
-    'id': 791651219529531402,
-    'prefix': '!'
-}
-
 TOKEN = os.getenv("TOKEN")
 
-PREFIX = SETTINGS['prefix']
 
 # TODO: настроить логирование
 
@@ -25,23 +27,48 @@ def start_bot():
     """
     Starts a bot.
     """
-    discord_bot = commands.Bot(command_prefix='!', help_command=None, case_insensitive=True)
+
+    prefix = get_setting("PREFIX")
+    # intents = discord.Intents.default()
+    # intents.members = True
+
+    discord_bot = discord.ext.commands.Bot(command_prefix=prefix,
+                                           help_command=None,
+                                           case_insensitive=True)
+    bot_name = get_setting("BOT_NAME")
+
+    bot_names = [bot_name]
+    bot_names.extend(get_setting("ALTERNATIVE_NAMES"))
+
+    appear_phrases = get_setting("APPEAR")
+
+
+    @discord_bot.command()
+    async def repeat(ctx, times: int, content='repeating...'):
+        """Repeats a message multiple times."""
+        for i in range(times):
+            await ctx.send(content)
 
     @discord_bot.event
     async def on_ready():
-        print(f'{discord_bot.user.name}: Приветик! Я снова с вами:)')
+        print(f'{discord_bot.user.name}: Бот готов к работе!')
 
     @discord_bot.event
     async def on_message(message):
+        # no need to reply on own messages
+        call_bot = False
         if message.author == discord_bot.user:
             return
-        if (
-                ("Lyna" in message.content) or
-                ("Лина" in message.content)
 
-        ):
-            await message.channel.send('А вот и я=) Вызывали?')
+        for name in bot_names:
+            if name in message.content:
+                call_bot = True
+                break
 
+        if call_bot:
+            appear_phrase = choice(appear_phrases)
+            await message.channel.send(appear_phrase)
+        # run command processing
         await discord_bot.process_commands(message)
 
     # TODO: Error handling
@@ -59,63 +86,63 @@ def start_bot():
 
         emb.set_author(name=context.author.name, icon_url=context.author.avatar_url)
 
-        print(context.author.name)
+        print(f"{context.author.name} запросил справку!")
         # Отображает: ctx.author.name - Имя отправителя, ctx.author.avatar_url - Аватар отправителя
         emb.add_field(name='Управление каналом',
-                      value=f'`{PREFIX}move user channel`  - перемещю пользователя в указанный канал)\n'
-                            f'`{PREFIX}crtc name`  - создам новый текстовый канал с именем name)\n'
-                            f'`{PREFIX}crvc name`  - создам новый голосовой канал с именем name)\n'
-                            f'`{PREFIX}create [v/t] name,name1...`  - создам сразу несколько голосовых'
+                      value=f'`{prefix}move user channel`  - перемещю пользователя в указанный канал)\n'
+                            f'`{prefix}crtc name`  - создам новый текстовый канал с именем name)\n'
+                            f'`{prefix}crvc name`  - создам новый голосовой канал с именем name)\n'
+                            f'`{prefix}create [v/t] name,name1...`  - создам сразу несколько голосовых'
                             f' или текстовых каналов\n'
-                            f'`{PREFIX}createm [v/t] name [start_num end_num]` - создам сразу несколько голосовых'
+                            f'`{prefix}createm [v/t] name [start_num end_num]` - создам сразу несколько голосовых'
                             f' или текстовых каналов с приписками справа)\n'
-                            f'`{PREFIX}deletem name [start_num end_num]`  - удалю каналы с приписками справа)\n'
-                            f'`{PREFIX}del name`  - удалю канал с именем name)\n'
-                            f'`{PREFIX}rename member_name new` - сменю ник\n'
-                            f'`{PREFIX}kick member_name` - выкину нехорошего человека с сервера\n'
-                            f'`{PREFIX}ban member_name` - забаню нехорошего человека\n'
-                            f'`{PREFIX}unban member_name` - разбаню того, кто это заслужил\n',
+                            f'`{prefix}deletem name [start_num end_num]`  - удалю каналы с приписками справа)\n'
+                            f'`{prefix}del name`  - удалю канал с именем name)\n'
+                            f'`{prefix}rename member_name new` - сменю ник\n'
+                            f'`{prefix}kick member_name` - выкину нехорошего человека с сервера\n'
+                            f'`{prefix}ban member_name` - забаню нехорошего человека\n'
+                            f'`{prefix}unban member_name` - разбаню того, кто это заслужил\n',
                       inline=False)
         emb.add_field(name='Текстовые',
-                      value=f'`{PREFIX}hello` - поприветствую тебя\n'
-                            f'`{PREFIX}phrase` - не хочешь крутую фразочку?)\n'
-                            f'`{PREFIX}here`  - отвечу тебе, если я тут)\n'
-                            f'`{PREFIX}fact` - отправлю случайный факт из интернета\n'
-                            f'`{PREFIX}quote` - отправлю цитату из интернета\n'
-                            f'`{PREFIX}fuc`, `{PREFIX}f`  - хочешь факулечку?)\n'
-                            f'`{PREFIX}me`, `{PREFIX}info`  - расскажу тебе факт обо мне\n'
-                            f'`{PREFIX}status`, `{PREFIX}presence new`  - изменю свой статус на новый (для админов)\n',
+                      value=f'`{prefix}hello` - поприветствую тебя\n'
+                            f'`{prefix}phrase` - не хочешь крутую фразочку?)\n'
+                            f'`{prefix}here`  - отвечу тебе, если я тут)\n'
+                            f'`{prefix}fact` - отправлю случайный факт из интернета\n'
+                            f'`{prefix}quote` - отправлю цитату из интернета\n'
+                            f'`{prefix}fuc`, `{prefix}f`  - хочешь факулечку?)\n'
+                            f'`{prefix}me`, `{prefix}info`  - расскажу тебе факт обо мне\n'
+                            f'`{prefix}status`, `{prefix}presence new`  - изменю свой статус на новый (для админов)\n',
                       inline=False)
         emb.add_field(name='Развлекающие',
-                      value=f'`{PREFIX}dice n m` - брошу кубик c m-гранями n раз  \n'
-                            f'`{PREFIX}choose c1 c2 ...` - выберу один из вариантов \n'
-                            f'`{PREFIX}rand`, `{PREFIX}r`, `{PREFIX}random [startn endn]`'
+                      value=f'`{prefix}dice n m` - брошу кубик c m-гранями n раз  \n'
+                            f'`{prefix}choose c1 c2 ...` - выберу один из вариантов \n'
+                            f'`{prefix}rand`, `{prefix}r`, `{prefix}random [startn endn]`'
                             '- выберу случайное число \n'
-                            f'`{PREFIX}image`, `{PREFIX}img`, `{PREFIX}im`, `{PREFIX}i`'
+                            f'`{prefix}image`, `{prefix}img`, `{prefix}im`, `{prefix}i`'
                             ' - отправлю случайную картинку из интернета\n'
-                            f'`{PREFIX}gif`, `{PREFIX}gff`, `{PREFIX}gf`'
+                            f'`{prefix}gif`, `{prefix}gff`, `{prefix}gf`'
                             ' - отправлю случайную gif - картинку из интернета\n'
-                            f'`{PREFIX}girl`, `{PREFIX}g`'
-                            ' - отправлю случайную картинку девушки из интернета\n'                            
-                            f'`{PREFIX}anime`, `{PREFIX}a`'
+                            f'`{prefix}girl`, `{prefix}g`'
+                            ' - отправлю случайную картинку девушки из интернета\n'
+                            f'`{prefix}anime`, `{prefix}a`'
                             ' - отправлю случайную картинку аниме-девушки из интернета\n',
                       inline=False)
         emb.add_field(name='Голосовые',
-                      value=f'`{PREFIX}join` - подключусь к голосовому каналу\n'
-                            f'`{PREFIX}leave` - покину голосовой канал\n'
-                            f'`{PREFIX}playf file`, `{PREFIX}play_file file`,'
-                            f' `{PREFIX}plf file` - проиграю файл, если он у меня есть)\n'
-                            f'`{PREFIX}playnow link`, `{PREFIX}play_now link`,'
-                            f' `{PREFIX}playn link`, `{PREFIX}pln link` - ТОЛЬКО ДЛЯ АДМИНОВ:'
+                      value=f'`{prefix}join` - подключусь к голосовому каналу\n'
+                            f'`{prefix}leave` - покину голосовой канал\n'
+                            f'`{prefix}playf file`, `{prefix}play_file file`,'
+                            f' `{prefix}plf file` - проиграю файл, если он у меня есть)\n'
+                            f'`{prefix}playnow link`, `{prefix}play_now link`,'
+                            f' `{prefix}playn link`, `{prefix}pln link` - ТОЛЬКО ДЛЯ АДМИНОВ:'
                             f' проиграю файл по ссылке(с предзагрузкой)\n'
-                            f'`{PREFIX}stream link`, `{PREFIX}strm link`- ТОЛЬКО ДЛЯ АДМИНОВ:'
+                            f'`{prefix}stream link`, `{prefix}strm link`- ТОЛЬКО ДЛЯ АДМИНОВ:'
                             f' проиграю файл по ссылке\n'
-                            f'`{PREFIX}play link`, `{PREFIX}addp link`,'
-                            f' `{PREFIX}pladd link`, `{PREFIX}ppl link` - добавлю файл в плейлист'
+                            f'`{prefix}play link`, `{prefix}addp link`,'
+                            f' `{prefix}pladd link`, `{prefix}ppl link` - добавлю файл в плейлист'
                             f' и проиграю его когда прийдёт его время)\n'
-                            f'`{PREFIX}list`, `{PREFIX}pls` - покажу содержимое плейлиста)\n'
-                            f'`{PREFIX}stop` - перестану проигрывать музыку\n'
-                            f'`{PREFIX}volume level` - поменяю уровень громкости\n',
+                            f'`{prefix}list`, `{prefix}pls` - покажу содержимое плейлиста)\n'
+                            f'`{prefix}stop` - перестану проигрывать музыку\n'
+                            f'`{prefix}volume level` - поменяю уровень громкости\n',
                       inline=False)
 
         # Отображаемый блок текста. name - Жирный крупный текст | value - обычный текст под "name"
@@ -137,7 +164,7 @@ def start_bot():
         await context.send(embed=emb)
         # Отправляет сообщение и так же преобразует emb в embed
 
-        print(f'[Logs:info] Справка по командам была успешно выведена | {PREFIX}help ')
+        print(f'[Logs:info] Справка по командам была успешно выведена | {prefix}help ')
 
     # Adding functionality as  cogs
     discord_bot.add_cog(messaging_cog.MessagingCog(discord_bot))
@@ -145,7 +172,13 @@ def start_bot():
     discord_bot.add_cog(voice_cog.VoiceCog(discord_bot))
     discord_bot.add_cog(manage_cog.ManageCog(discord_bot))
     discord_bot.run(TOKEN)
-    print(f"Бот {SETTINGS['bot_name']}:{SETTINGS['id']} запущен")
+
+    cog = discord_bot.get_cog('MessagingCog')
+    commands = cog.get_commands()
+    print([c.name for c in commands])
+
+    bot_id = get_setting("ID")
+    print(f"Бот {bot_name}:{bot_id} запущен!")
 
 
 start_bot()

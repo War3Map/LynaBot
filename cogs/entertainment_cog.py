@@ -9,13 +9,14 @@ from bs4 import BeautifulSoup
 
 
 from additional.web_parser import parse_from_html_test, get_gif_test
+from additional.config_loader import get_setting
 
-ANIME_IMAGE_URL = 'https://animepicsx.net/random'
 
-RANDOM_IMAGE_SITE = 'https://www.generatormix.com'
-GIRL_URL = 'https://www.generatormix.com/random-beautiful-women'
-RANDOM_IMAGE_URL = 'https://www.generatormix.com/random-image-generator'
-GIF_URL = 'https://xdgif.ru/random/'
+ANIME_IMAGE_URL = get_setting("ANIME_IMAGE_URL")
+RANDOM_IMAGE_SITE = get_setting("RANDOM_IMAGE_SITE")
+GIRL_URL = get_setting("GIRL_URL")
+RANDOM_IMAGE_URL = get_setting("RANDOM_IMAGE_URL")
+GIF_URL = get_setting("GIF_URL")
 
 
 def get_image():

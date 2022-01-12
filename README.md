@@ -1,21 +1,27 @@
 # LynaBot
 Lyna Bot for Discord
 
+Functions:
+- entertainment(roll dice and pick random number)
+- send random images
+- manage channel
+- play songs(experimental, in development)
+
 # Installation
 
 - place ffmpeg into tools folder
 ```
-pip install (path to requirements.txt)
+pip install -r (path to requirements.txt)
 ```
 
 # Starting bot
 
-run bot:
+Run bot:
 ```
 python run_bot.py
 ```
 
-run server with bot:
+Run server(Flask) with bot:
 ```
 python start.py
 ```

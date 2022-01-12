@@ -1,7 +1,7 @@
 import requests
 
 from bs4 import BeautifulSoup
-
+from additional.config_loader import get_setting
 
 HEADERS = {
     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) '
