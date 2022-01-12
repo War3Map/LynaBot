@@ -1,25 +1,27 @@
-import codecs
+# import codecs
+# import re
 import random
-import re
-
-import discord
+# import discord
 import requests
 
 from discord.ext import commands
 from bs4 import BeautifulSoup
 
 
+from additional.web_parser import parse_from_html_test, get_gif_test
+
 ANIME_IMAGE_URL = 'https://animepicsx.net/random'
 
 RANDOM_IMAGE_SITE = 'https://www.generatormix.com'
 GIRL_URL = 'https://www.generatormix.com/random-beautiful-women'
-RIMAGE_URL = 'https://www.generatormix.com/random-image-generator'
+RANDOM_IMAGE_URL = 'https://www.generatormix.com/random-image-generator'
+GIF_URL = 'https://xdgif.ru/random/'
 
 
 def get_image():
     message = "К сожалению мне не удалось найти ничего интересного"
 
-    response = requests.get(RIMAGE_URL)
+    response = requests.get(RANDOM_IMAGE_URL)
 
     soup = BeautifulSoup(response.text, 'lxml')
     res = soup.find_all("img", class_="lazy thumbnail")
@@ -78,6 +80,10 @@ def get_girl_image():
     return RANDOM_IMAGE_SITE + message
 
 
+def get_gif():
+    return parse_from_html_test(get_gif_test, GIF_URL)
+
+
 class EntertainmentCog(commands.Cog):
     """
     Entertainment bot functions
@@ -108,20 +114,26 @@ class EntertainmentCog(commands.Cog):
 
     @commands.command(aliases=['img', 'im', 'i'],
                       description='Отправлю случайную аниме картинку')
-    async def image(self, context, start_num=0, end_num=100):
-        """Gets random image from RIMAGE_URL"""
+    async def image(self, context):
+        """Gets random image from RANDOM_IMAGE_URL"""
         await context.send(get_image())
 
     @commands.command(aliases=['a', 'anime', 'waifu', 'w'],
                       description='Отправлю случайную аниме картинку c девушкой')
-    async def anime_image(self, context, start_num=0, end_num=100):
+    async def anime_image(self, context):
         """Gets random image from ANIME_IMAGE_URL"""
         await context.send(get_anime_image())
+
+    @commands.command(aliases=['giff', 'gf'],
+                      description='Отправлю случайную gif картинку')
+    async def gif(self, context):
+        """Gets random gif from GIF_URL"""
+        await context.send(get_gif())
 
     @commands.command(name="girl",
                       aliases=['g'],
                       description='Отправлю случайную картинку')
-    async def girl_image(self, context, start_num=0, end_num=100):
+    async def girl_image(self, context):
         """Gets random image from GIRL_URL"""
         await context.send(get_girl_image())
 

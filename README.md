@@ -1,15 +1,25 @@
 # LynaBot
 Lyna Bot for Discord
 
+# Installation
+
+- place ffmpeg into tools folder
+```
+pip install (path to requirements.txt)
+```
+
+# Starting bot
+
 run bot:
-- run_bot.py
+```
+python run_bot.py
+```
 
 run server with bot:
-- start.py
+```
+python start.py
+```
 
-requirements:
-- discord
-- flask
-- youtube_dl
-- you need fmpeg in app directory
+# Structure
 
+...

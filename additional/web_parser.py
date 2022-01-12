@@ -20,10 +20,17 @@ FACT_URL = "https://randstuff.ru/fact/"
 QUOTE_URL = "https://citaty.info/random"
 
 
-def parse_from_html_test(parse_func, url):
+def parse_from_html_test(parse_func, url, params=None):
+    """
+    Parse html and return result as text
+    :param parse_func: function for parsing
+    :param url: resourse link for parse
+    :param params: parse function params
+    :return:
+    """
     message = "К сожалению мне не удалось найти ничего интересного"
 
-    response = requests.get(url, headers=HEADERS)
+    response = requests.get(url, headers=HEADERS, params=params)
 
     # search_result = get_fact_result(response)
     search_result = parse_func(response)
@@ -38,6 +45,11 @@ def parse_from_html_test(parse_func, url):
 
 
 def get_fact_result(response):
+    """
+    Returns parse result of fact for response
+    :param response: request result
+    :return:
+    """
     soup = BeautifulSoup(response.text, 'lxml')
     try:
         res = soup.find("table", class_="text").findChild("td", recursive=True)
@@ -48,7 +60,11 @@ def get_fact_result(response):
 
 
 def get_quote_result(response):
-
+    """
+    Returns parse result of quote for response
+    :param response: request result
+    :return:
+    """
     soup = BeautifulSoup(response.text, 'lxml')
     text = soup.find("div", class_="field-item even last")
     author = soup.find("div", class_="field-item even")
@@ -59,6 +75,11 @@ def get_quote_result(response):
 
 
 def get_fact2_result(response):
+    """
+    Returns parse result of fact for response: second version
+    :param response: request result
+    :return:
+    """
     soup = BeautifulSoup(response.text, 'lxml')
     try:
         res = soup.find("div", id="quote")
@@ -69,6 +90,28 @@ def get_fact2_result(response):
         return None
 
 
-print(parse_from_html_test(get_quote_result, QUOTE_URL))
-print(parse_from_html_test(get_fact_result, FACT_URL))
-print(parse_from_html_test(get_fact2_result, "http://webdiscover.ru/facts/"))
+def get_gif_test(response):
+    """
+    Returns parse result of gif for response
+    :param response: request result
+    :return:
+    """
+    # print(response.text)
+    soup = BeautifulSoup(response.text, 'lxml')
+    try:
+        res = soup.find("div", class_="entry").findChild("img")
+        return res['src']
+    except Exception as ex:
+        print(ex)
+        return None
+
+
+def test():
+    print(parse_from_html_test(get_quote_result, QUOTE_URL))
+    print(parse_from_html_test(get_fact_result, FACT_URL))
+    # print(parse_from_html_test(get_fact2_result, "http://webdiscover.ru/facts/"))
+    # print(parse_from_html_test(get_gif_test, "https://xdgif.ru/random/"))
+
+
+if __name__=="__main__":
+    test()

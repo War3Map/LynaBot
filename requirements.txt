@@ -1,7 +1,8 @@
-discord~=1.0.1
-Flask~=1.1.2
-requests~=2.13.0
-youtube_dl~=2020.12.31
-beautifulsoup4~=4.9.3
-lxml~=4.6.2
-selenium~=3.141.0
+discord>=1.0.1
+Flask>=1.1.2
+requests>=2.13.0
+youtube_dl>=2020.12.31
+beautifulsoup4>=4.9.3
+lxml>=4.6.2
+selenium>=3.141.0
+pynacl~=1.4.0
