@@ -173,12 +173,12 @@ def start_bot():
     discord_bot.add_cog(manage_cog.ManageCog(discord_bot))
     discord_bot.run(TOKEN)
 
-    cog = discord_bot.get_cog('MessagingCog')
-    commands = cog.get_commands()
-    print([c.name for c in commands])
-
-    bot_id = get_setting("ID")
-    print(f"Бот {bot_name}:{bot_id} запущен!")
+    # cog = discord_bot.get_cog('MessagingCog')
+    # commands = cog.get_commands()
+    # print([c.name for c in commands])
+    #
+    # bot_id = get_setting("ID")
+    # print(f"Бот {bot_name}:{bot_id} запущен!")
 
 
 start_bot()
