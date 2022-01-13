@@ -7,7 +7,7 @@ BOT_START_FILE = 'run_bot.py'
 # for start PYTHON_PROCESS = 'python3'
 
 # for testing
-PYTHON_PROCESS = "python3"
+PYTHON_PROCESS = r"C:\Python3.9"
 app = Flask(__name__)
 
 
