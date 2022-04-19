@@ -1,15 +1,8 @@
-# import codecs
-# import re
-import random
-# import discord
 from pathlib import Path
-
-import discord
-import requests
 
 from discord.ext import commands
 from additional.field_of_dreams.dream_game import DreamGame, GameStates
-from additional.game_session import GameSessions, GameSession
+from additional.game_session import GameSessions
 
 
 class DreamGameCog(commands.Cog):
@@ -27,18 +20,19 @@ class DreamGameCog(commands.Cog):
     async def game_turn(self, context, game):
         """
         Game turn. Start afrer spin the drum
-        :param current_player:
-        :return:
+
         """
         current_player = game.current_player_name
-        await context.send(f"Ходит игрок {current_player}\n"
-                           f"Текущее слово {game.display_word}\n"
-                           f"Барабан крутится за вас\n!"
-                           f"Ваш счёт {game.cur_player_score}\n")
+        await context.send(f"{game.game_question}\n"
+                           f"Ходит игрок {current_player}\n"
+                           f"Барабан крутится за вас\n"
+                           f"Счёт игрока{current_player}: {game.cur_player_score}\n"
+                           f"Текущее слово {game.clean_word}\n")
 
-        is_player_turn, message = game.get_current_score_state()
-        await context.send(f"{message}")
-        if not is_player_turn:
+        next_spin, score_message = game.spin_drum()
+        await context.send(f"{score_message}")
+
+        if next_spin:
             await self.game_turn(context, game)
 
     async def is_player_in_game(self, context, player_name, game):
@@ -58,9 +52,10 @@ class DreamGameCog(commands.Cog):
             return False
         return True
 
-    async def over_turn(self, context, game, guess_result, all_in: bool = False):
+    async def over_turn(self, context, game, guess_result, allin_player: str = ""):
         """
         Over player turn. Over game if Player wins
+        :param allin_player:
         :param guess_result:
         :return:
         """
@@ -69,16 +64,14 @@ class DreamGameCog(commands.Cog):
             await context.send(f"Ваш счёт {game.cur_player_score}")
         else:
             await context.send(f"Не верно!")
-            print(f"{all_in}")
-            if all_in:
-                await context.send(f"Игрок {game.current_player_name} проиграл")
-                game.lose_player()
+            print(f"{allin_player}")
+            if allin_player:
+                await context.send(f"Игрок {allin_player} проиграл")
+                game.lose_player(allin_player)
 
         if game.check_over():
-            print("over")
             await context.send(game.victory_message())
         else:
-            print("not over")
             await self.game_turn(context, game)
 
     @commands.command(description=' Запускаю поле чудес)',
@@ -128,6 +121,27 @@ class DreamGameCog(commands.Cog):
         else:
             await context.send(f"Игрок {player_name} уже в игре {session_name}!")
 
+
+    @commands.command(description='Отключаю игрока',
+                      aliases=['dc', 'exit_chud', 'exit_dream'])
+    async def exit_game(self, context):
+        """
+        Join player to game to
+        :param context:
+        :return:
+        """
+        player_name = context.message.author
+        session_name = context.channel.id
+        if not self.sessions.exists(session_name):
+            await context.send(f"Игровая сессия {session_name} отсутствует")
+            return
+
+        game: DreamGame = self.sessions.get_game(session_name)
+        if player_name in game.turns_order:
+            game.lose_player(player_name)
+
+            await context.send(f"Игрок {player_name} вышел из игры {session_name}!")
+
     @commands.command(description='Запускаю поле чудес',
                       aliases=['sdg', 'start_chud', 'start_dream'])
     async def start_game(self, context):
@@ -151,8 +165,30 @@ class DreamGameCog(commands.Cog):
 
         start_message = game.start_game()
 
-        await context.send(f"{start_message}!")
         await self.game_turn(context, game)
+
+    @commands.command(description='Останавливаю игру',
+                      aliases=['ssg', 'stop_chud', 'stop_dream'])
+    async def stop_game(self, context):
+        """
+        Stops a game
+
+        :param context:
+        :return:
+        """
+        player_name = context.message.author
+        session_name = context.channel.id
+
+        if not self.sessions.exists(session_name):
+            await context.send(f"Игровая сессия {session_name} отсутствует")
+            return
+
+        game = self.sessions.get_game(session_name)
+        if player_name not in game.players_score:
+            await context.send(f"Только игроки  {game.players_score} из {session_name} могут остановить иру!")
+            return
+        stop_message = game.stop_game()
+        await context.send(f"Игра остановлена! {stop_message}")
 
     @commands.command(description='Запускаю поле чудес',
                       aliases=['rsgd', 'restart_chud', 'restart_dream'])
@@ -196,13 +232,18 @@ class DreamGameCog(commands.Cog):
         if not is_player_turn:
             return
 
-        if symbol.upper() not in game.available_symbols:
-            await context.send(f"Такая буква уже была."
+        if len(symbol) != 1:
+            await context.send(f"Назовите одну букву, а не слово!")
+            return
+
+        if symbol.upper() not in game.all_symbols:
+            await context.send(f"Таких букв нет в алфавите."
                                f"Доступные буквы: {sorted(game.available_symbols)}")
             return
 
-        if len(symbol) != 1:
-            await context.send(f"Назовите букву, а не слово!")
+        if symbol.upper() not in game.available_symbols:
+            await context.send(f"Такая буква уже была."
+                               f"Доступные буквы: {sorted(game.available_symbols)}")
             return
 
         guess_result = game.guess_symbol(symbol)
@@ -211,6 +252,9 @@ class DreamGameCog(commands.Cog):
     @commands.command(description='Покажу доступные буквы',
                       aliases=['alpha', 'show_al'])
     async def show_alpha(self, context):
+        """
+        Shows remaining alphabet symbols
+        """
         player_name = context.message.author
         session_name = context.channel.id
         if not self.sessions.exists(session_name):
@@ -218,7 +262,7 @@ class DreamGameCog(commands.Cog):
             return
 
         game: DreamGame = self.sessions.get_game(session_name)
-        if not player_name in game.turns_order:
+        if player_name not in game.turns_order:
             await context.send(f"Вы не игре {session_name}!")
             return
 
@@ -246,8 +290,8 @@ class DreamGameCog(commands.Cog):
             await context.send(f"Назовите слово, а не букву!")
             return
 
-        guess_result = game.guess_complete_word(word)
-        await self.over_turn(context, game, guess_result, all_in=True)
+        guess_result, player_name = game.guess_complete_word(word)
+        await self.over_turn(context, game, guess_result, allin_player=player_name)
 
     @commands.Cog.listener()
     async def on_message(self, message):

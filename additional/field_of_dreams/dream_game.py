@@ -5,9 +5,9 @@ from dataclasses import dataclass
 from random import randint
 from typing import Dict, Optional, Union, List
 
-from .game_config import DRUM_SCORES, BANK, PLUS, PRIZE, X2, STATES_DESCRIPTIONS, ALPHABET
-from .questions import load_questions, QUESTIONS_FILE
-from .extra_mechanics import x2_action, bank_action, zero_action, prize_action
+from game_config import DRUM_SCORES, BANK, PLUS, PRIZE, X2, STATES_DESCRIPTIONS, ALPHABET
+from questions import load_questions, QUESTIONS_FILE
+from extra_mechanics import x2_action, bank_action, zero_action, prize_action
 
 
 class GameBonuses(enum.Enum):
@@ -25,18 +25,22 @@ class GameStates(enum.Enum):
     Over = 4
 
 
+# game acrions
 STATES_ACTIONS = {
-    GameBonuses.Bank: bank_action,
-    GameBonuses.Zero: zero_action,
-    GameBonuses.x2: x2_action,
-    GameBonuses.Prize: prize_action,
-    GameBonuses.Plus: lambda s: (0, False)
+    GameBonuses.Bank.value: bank_action,
+    GameBonuses.Zero.value: zero_action,
+    GameBonuses.x2.value: x2_action,
+    GameBonuses.Prize.value: prize_action,
+    GameBonuses.Plus.value: lambda s, ss: (True, 0)
 
 }
 
 
 @dataclass
 class DreamGame:
+    """
+    POLE CHUDES game!
+    """
     players_score: Dict[str, int] = dict
     turns_order: List[str] = list
     game_state: Union[int, GameStates] = GameStates.Awaiting
@@ -46,18 +50,20 @@ class DreamGame:
     display_word: str = ""
     symbols_remain: int = 999
     hidden_symbol: str = "-"
-    current_score: int = 0
     victory_player: str = ""
     name: str = "Поле Чудес"
     available_symbols: List[str] = list
+    all_symbols: List[str] = None
+    current_score: int = 0
 
     def change_turn(self):
         players_count = len(self.players_score)
         self.current_player = (self.current_player + 1) % players_count
+        self.current_score = 0
 
     def __get_question_word(self):
         total_len = len(self.questions)
-        random_num = randint(0, total_len)
+        random_num = randint(0, total_len - 1)
         words = [word for word in self.questions.keys()]
         return words[random_num]
 
@@ -67,6 +73,17 @@ class DreamGame:
 
     def prepare_game(self, players_list: list = None, turn_order="random",
                      question_file=QUESTIONS_FILE):
+        """
+        Initializes game variables
+
+        :param players_list: list of players
+
+        :param turn_order: players orders
+
+        :param question_file: filename with questions
+
+        :return:
+        """
         self.victory_player = ""
         self.questions = load_questions(question_file)
         self.current_player = 0
@@ -74,17 +91,24 @@ class DreamGame:
         if players_list is None:
             players_list = []
         self.players_score = {player: 0 for player in players_list}
-        if turn_order == "random":
-            random.shuffle(players_list)
         self.turns_order = players_list.copy()
+        if turn_order == "random":
+            random.shuffle(self.turns_order)
         self.suggested_word = self.__get_question_word()
         self.display_word = self.__form_display_word()
         self.symbols_remain = len(self.suggested_word)
-        self.available_symbols = ALPHABET
-        print(f"Чит {self.suggested_word}")
+        self.available_symbols = ALPHABET.copy()
+        self.all_symbols = ALPHABET.copy()
+        # print(f"Чит {self.suggested_word}")
 
     def reload_game(self, turn_order="random",
                     question_file=QUESTIONS_FILE):
+        """
+        Reload game for second use
+        :param turn_order:
+        :param question_file:
+        :return:
+        """
         self.victory_player = ""
         self.questions = load_questions(question_file)
         self.current_player = 0
@@ -93,45 +117,84 @@ class DreamGame:
         if players_list is None:
             players_list = []
         self.players_score = {player: 0 for player in players_list}
-        if turn_order == "random":
-            random.shuffle(players_list)
         self.turns_order = players_list.copy()
+        if turn_order == "random":
+            random.shuffle(self.turns_order)
         self.suggested_word = self.__get_question_word()
         self.display_word = self.__form_display_word()
         self.symbols_remain = len(self.suggested_word)
-        self.available_symbols = ALPHABET
-        print(f"Чит {self.suggested_word}")
+        self.available_symbols = ALPHABET.copy()
+        # print(f"Чит {self.suggested_word}")
 
     def join_player(self, name):
+        """
+        Add player to game
+        :param name:
+        :return:
+        """
         self.players_score[name] = 0
         self.turns_order.append(name)
 
-    def start_game(self) -> str:
+    def start_game(self, order="random") -> str:
+        """
+        Starts a game session
+        :return:
+        """
         self.game_state = GameStates.Running
         question = self.questions[self.suggested_word]
+        if order == "random":
+            random.shuffle(self.turns_order)
         return (f"Игра началась!\n"
                 f"Угадайте слово по буквам:\n"
                 f"{question}"
                 )
 
+    @property
+    def game_question(self) -> str:
+        """
+        Game_question
+        :return:
+        """
+
+        return self.questions[self.suggested_word]
+
+    @property
+    def clean_word(self) -> str:
+        """
+        Starts a game session
+        :return:
+        """
+        word = [char for char in self.display_word]
+        str_word = " ".join(word)
+        return f"{str_word} ({len(self.display_word)})"
+
     def stop_game(self) -> str:
+        """
+        Stops game
+        :return:  game over message
+        """
         self.game_state = GameStates.Awaiting
         return (f"Игра окончена!\n"
                 f"{self.suggested_word}"
                 )
 
     def reset_score(self):
+        """
+        Reset score for current player
+        :return:
+        """
         player_name = self.turns_order[self.current_player]
         self.players_score[player_name] = 0
-        print(f"{player_name} теряет все свои очки!")
 
-    def increase_score(self, mult=1):
-        player_name = self.turns_order[self.current_player]
-        increased_value = self.current_score * mult
-        self.players_score[player_name] += increased_value
-        print(f"{player_name} получает {increased_value}")
 
     def guess_symbol(self, guess_symbol: str):  # success_state = False
+        """
+        Guess separate symbol
+
+        :param guess_symbol:
+        :return:
+        """
+
         # TODO: bad replace
         guess_symbol = guess_symbol.upper()
 
@@ -144,14 +207,6 @@ class DreamGame:
                 new_display[idx] = symbol
 
         self.display_word = "".join(new_display)
-        # for symbol in self.suggested_word:
-        #     if guess_symbol == symbol:
-        #         success_state = True
-        #         self.symbols_remain -= 1
-        # new_display = [guess_symbol
-        #                if guess_symbol == symbol
-        #                else self.hidden_symbol
-        #                for symbol in self.suggested_word]
 
         if count_symbols > 0:
             self.increase_score()
@@ -161,10 +216,19 @@ class DreamGame:
         return True if count_symbols > 0 else False
 
     def remove_current_player(self):
-
+        """
+        Removes player from game
+        :return:
+        """
         self.turns_order.pop(self.current_player)
 
-    def guess_complete_word(self, word: str):  # success_state = False
+    def guess_complete_word(self, word: str):
+        """
+        Guess all word
+        :param word:
+        :return:
+        """
+        player_name = self.current_player_name
         if word.upper() == self.suggested_word:
             self.symbols_remain = 0
 
@@ -173,7 +237,7 @@ class DreamGame:
         else:
             self.increase_score(mult=10)
 
-        return True if self.symbols_remain == 0 else False
+        return (True, player_name) if self.symbols_remain == 0 else (False, player_name)
 
     def get_current_player_score(self):
         player_name = self.turns_order[self.current_player]
@@ -181,31 +245,85 @@ class DreamGame:
 
     @property
     def cur_player_score(self):
+        """
+        Current Player score
+        :return:
+        """
         return self.get_current_player_score()
 
-    def get_current_score_state(self):
-        self.current_score = random.choice(DRUM_SCORES)
-        print(STATES_ACTIONS.keys() )
-        if self.current_score not in STATES_ACTIONS.values():
-            self.current_score = self.current_score
-            return True, f"{self.current_score} очков!"
+    def sector_plus_activate(self):
+        """
+        Activates sector plus bonus
+        :return:
+        """
+        remain_symbols = [orig for dis, orig in zip(self.display_word, self.suggested_word) if
+                          dis == self.hidden_symbol]
+        unique_symbols = list(set(remain_symbols))
+        # randomly choice symbol from remainings(no duplicates)
+        if not remain_symbols:
+            return
 
-        extra_val = self.current_score
-        player_score = self.get_current_player_score()
-        end_turn, self.current_score = STATES_ACTIONS[self.current_score](player_score,
-                                                                          extra_val)
-        return end_turn, STATES_DESCRIPTIONS[extra_val]
+        plus_symbol = random.choice(unique_symbols)
 
-        #
+        new_display = list(self.display_word)
+        for idx, symbol in enumerate(self.suggested_word):
+            if plus_symbol == symbol:
+                new_display[idx] = symbol
+                self.symbols_remain -= 1
 
-    # def word(self):
-    #     return self.display_word
-    def is_over(self):
-        self.victory_player = self.turns_order[self.current_player]
-        return True if self.symbols_remain == 0 else False
+        self.display_word = "".join(new_display)
+
+    def increase_score(self):
+        cur_player = self.current_player_name
+        self.players_score[cur_player] += self.current_score
+
+    def increase_current_score(self, score):
+        self.current_score += score
+
+    def is_bonus(self,val):
+        return  val in STATES_ACTIONS
+
+    def check_bonus(self, val):
+        cur_score = self.cur_player_score
+        continue_turn, new_val = True, 0
+        if val in STATES_ACTIONS:
+            continue_turn, new_val = STATES_ACTIONS[val](cur_score, 0)
+            if val ==GameBonuses.Plus.value:
+                self.sector_plus_activate
+        return continue_turn, new_val
+
+    def get_bonus_info(self, val):
+        if val in STATES_DESCRIPTIONS:
+            return STATES_DESCRIPTIONS[val]
+        return ""
+
+    def spin_drum(self):
+        """
+        Gets turn state and drum score.
+
+        :return: Can player play this turn, word update state, current score
+        """
+
+        drum_val = random.choice(DRUM_SCORES)
+        if self.is_bonus(drum_val):
+            is_continue, new_val = self.check_bonus(drum_val)
+            info = self.get_bonus_info(drum_val)
+            if is_continue:
+                self.current_score += new_val
+            else:
+                self.change_turn()
+                print("ct")
+            return is_continue, f"{info}. Полученные очки {new_val}"
+        else:
+            self.current_score += drum_val
+            return False, f"{drum_val} очков на барабане!"
+
 
     def check_over(self):
-        print(self.symbols_remain)
+        """
+        Checks if game is over and finishes game
+        :return:
+        """
         if self.symbols_remain == 0:
             self.victory_player = self.turns_order[self.current_player]
             self.game_state = GameStates.Over
@@ -218,21 +336,40 @@ class DreamGame:
         return False
 
     def display_player_message(self):
+        """
+        Displays turn message
+        :return:
+        """
         cur_player = self.turns_order[self.current_player]
         return f"Сейчас ход {cur_player}.."
 
-    def lose_player(self):
+    def lose_player(self, player_name):
         """
         Makes current player lose
         :return:
         """
-        self.turns_order.remove(self.current_player_name)
+        self.turns_order.remove(player_name)
 
     @property
     def current_player_name(self):
+        """
+        Gets current player name
+        :return:
+        """
         return self.turns_order[self.current_player]
 
     def victory_message(self):
-        return (f"И перед нами победитель: {self.victory_player} !!!"
+        """
+        Returns victory message
+        :return:
+        """
+        other_scores = [f"{player} - {score}\n" for player, score in self.players_score.items()]
+        str_scores = "\n".join(other_scores)
+        win_message = (f"И перед нами победитель: {self.victory_player} !!!\n"
+                       f"Весь счёт: {str_scores}")
+        draw_message = (f"У нас ничья! Загаданное слово {self.suggested_word}\n !"
+                        f"Весь счёт: {str_scores}")
+
+        return (win_message
                 if len(self.turns_order) != 0
-                else f"У нас ничья! Загаданное слово {self.suggested_word}")
+                else draw_message)
