@@ -10,7 +10,8 @@ from cogs import (
     messaging_cog,
     entertainment_cog,
     voice_cog,
-    manage_cog
+    manage_cog,
+    field_of_dream_cog
 )
 
 import additional.config_loader
@@ -171,6 +172,7 @@ def start_bot():
     discord_bot.add_cog(entertainment_cog.EntertainmentCog(discord_bot))
     discord_bot.add_cog(voice_cog.VoiceCog(discord_bot))
     discord_bot.add_cog(manage_cog.ManageCog(discord_bot))
+    discord_bot.add_cog(field_of_dream_cog.DreamGameCog(discord_bot))
     discord_bot.run(TOKEN)
 
     # cog = discord_bot.get_cog('MessagingCog')
