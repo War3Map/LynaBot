@@ -42,12 +42,17 @@ class VoiceCog(commands.Cog):
     @commands.command()
     async def join(self, context):
         """Bot joins to current voice channel"""
-        channel = context.author.voice.channel
-        if channel:
+        try:
+            channel = context.author.voice.channel
+        except AttributeError:
+            channel = None
+
+        if channel is not None:
             print(f"Joining channel {channel.id}")
             await channel.connect(reconnect=False)
         else:
-            await context.send('Такого канала не существует!')
+            await context.send('Не понимаю к какому каналу подключиться. '
+                               'Пожалуйста зайдите в голосовой канал.')
 
     @commands.command()
     async def leave(self, context):
