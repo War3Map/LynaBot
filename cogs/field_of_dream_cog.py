@@ -104,6 +104,11 @@ class DreamGameCog(commands.Cog):
     @commands.command(description='Подключаю игрока',
                       aliases=['jc', 'join_chud', 'join_dream'])
     async def join_game(self, context):
+        """
+        Join player to game to
+        :param context:
+        :return:
+        """
         player_name = context.message.author
         session_name = context.channel.id
         if not self.sessions.exists(session_name):
@@ -127,7 +132,7 @@ class DreamGameCog(commands.Cog):
                       aliases=['sdg', 'start_chud', 'start_dream'])
     async def start_game(self, context):
         """
-        Join player to game sessions
+        Start game
 
         :param context:
         :return:
@@ -153,6 +158,7 @@ class DreamGameCog(commands.Cog):
                       aliases=['rsgd', 'restart_chud', 'restart_dream'])
     async def restart_dream_game(self, context):
         """
+        Restart game
 
         :param context:
         :return:
@@ -204,7 +210,7 @@ class DreamGameCog(commands.Cog):
 
     @commands.command(description='Покажу доступные буквы',
                       aliases=['alpha', 'show_al'])
-    async def show_alpha(self, context, symbol):
+    async def show_alpha(self, context):
         player_name = context.message.author
         session_name = context.channel.id
         if not self.sessions.exists(session_name):

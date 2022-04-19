@@ -114,6 +114,12 @@ class DreamGame:
                 f"{question}"
                 )
 
+    def stop_game(self) -> str:
+        self.game_state = GameStates.Awaiting
+        return (f"Игра окончена!\n"
+                f"{self.suggested_word}"
+                )
+
     def reset_score(self):
         player_name = self.turns_order[self.current_player]
         self.players_score[player_name] = 0
@@ -179,7 +185,8 @@ class DreamGame:
 
     def get_current_score_state(self):
         self.current_score = random.choice(DRUM_SCORES)
-        if self.current_score not in STATES_ACTIONS:
+        print(STATES_ACTIONS.keys() )
+        if self.current_score not in STATES_ACTIONS.values():
             self.current_score = self.current_score
             return True, f"{self.current_score} очков!"
 
@@ -226,7 +233,6 @@ class DreamGame:
         return self.turns_order[self.current_player]
 
     def victory_message(self):
-
         return (f"И перед нами победитель: {self.victory_player} !!!"
                 if len(self.turns_order) != 0
-                else "У нас ничья!")
+                else f"У нас ничья! Загаданное слово {self.suggested_word}")
