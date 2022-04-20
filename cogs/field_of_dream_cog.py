@@ -22,17 +22,17 @@ class DreamGameCog(commands.Cog):
         Game turn. Start afrer spin the drum
 
         """
-        current_player = game.current_player_name
-        await context.send(f"{game.game_question}\n"
-                           f"Ходит игрок {current_player}\n"
-                           f"Барабан крутится за вас\n"
-                           f"Счёт игрока{current_player}: {game.cur_player_score}\n"
-                           f"Текущее слово {game.clean_word}\n")
+        await context.send(game.turn_info)
+        repeat_spin = game.spin_drum()
 
-        next_spin, score_message = game.spin_drum()
-        await context.send(f"{score_message}")
+        if game.has_bonus:
+            await context.send(game.turn_bonus.message)
+        else:
+            await context.send(game.score_message)
 
-        if next_spin:
+        if game.check_over():
+            await context.send(game.victory_message())
+        elif repeat_spin:
             await self.game_turn(context, game)
 
     async def is_player_in_game(self, context, player_name, game):
@@ -61,10 +61,9 @@ class DreamGameCog(commands.Cog):
         """
         if guess_result:
             await context.send(f"Верно!")
-            await context.send(f"Ваш счёт {game.cur_player_score}")
         else:
-            await context.send(f"Не верно!")
-            print(f"{allin_player}")
+            await context.send(f"Нет! Не верно!")
+            # print(f"{allin_player}")
             if allin_player:
                 await context.send(f"Игрок {allin_player} проиграл")
                 game.lose_player(allin_player)
@@ -89,6 +88,8 @@ class DreamGameCog(commands.Cog):
             game: DreamGame = self.sessions.get_game(session_name)
             if game.game_state == GameStates.Running:
                 await context.send(f"Игра {session_name} уже запущена!")
+            elif game.game_state == GameStates.Awaiting:
+                await context.send(f"Игра {session_name} ожидает игроков")
             elif game.game_state == GameStates.NoGame:
                 game.prepare_game()
                 game.join_player(player_name)
@@ -120,7 +121,6 @@ class DreamGameCog(commands.Cog):
             await context.send(f"Игрок {player_name} присоеденился к {session_name}!")
         else:
             await context.send(f"Игрок {player_name} уже в игре {session_name}!")
-
 
     @commands.command(description='Отключаю игрока',
                       aliases=['dc', 'exit_chud', 'exit_dream'])
@@ -215,7 +215,7 @@ class DreamGameCog(commands.Cog):
                 await self.start_game(context)
 
     @commands.command(description='угадай символ',
-                      aliases=['guess_s', 'guess_char'])
+                      aliases=['guess_s', 'guess_char', 'symbol', 'sym'])
     async def guess_symbol(self, context, symbol):
         player_name = context.message.author
         session_name = context.channel.id
@@ -266,10 +266,14 @@ class DreamGameCog(commands.Cog):
             await context.send(f"Вы не игре {session_name}!")
             return
 
+        if player_name != game.current_player_name:
+            await context.send(f"Сейчас не ваш ход!!")
+            return
+
         await context.send(f"Доступные буквы: {sorted(game.available_symbols)}")
 
     @commands.command(description='угадай слово',
-                      aliases=['guess_w', 'guess_wor'])
+                      aliases=['guess_w', 'guess_wor', 'wor', 'word'])
     async def guess_word(self, context, word):
         player_name = context.message.author
         session_name = context.channel.id

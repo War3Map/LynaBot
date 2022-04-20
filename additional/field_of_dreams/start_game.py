@@ -2,7 +2,7 @@ from dream_game import DreamGame
 
 PLAYERS_NUM = 4
 
-PLAYERS = ["ds", "Хай", "Бай", "Hello"]
+PLAYERS = ["Петр", "Василий", "Сергей", "Андрей"]
 
 
 def play_game():
@@ -12,17 +12,20 @@ def play_game():
         game.prepare_game()
         for player in PLAYERS:
             game.join_player(player)
-        start_message = game.start_game()
-        print(start_message)
+        game.start_game()
         while True:
 
-            print(game.display_player_message())
-            print("Вращайте барабан")
-            repeat, message = game.spin_drum()
-            print(f"Счёт игрока  {game.current_player_name}: {game.cur_player_score}")
-            print(message)
-            print(f"Слово{game.display_word}")
-            if not repeat:
+            print(game.turn_info, end="\n\n")
+            repeat = game.spin_drum()
+            print(repeat)
+            if game.has_bonus:
+                print(game.turn_bonus.message)
+            else:
+                print(game.score_message)
+            if repeat:
+                # print(game.turn_bonus.message)
+                ...
+            elif not repeat:
                 choice = input("Введите букву или назовёте слово целиком? (Напишите слово!")
                 if choice.lower() == "слово":
                     word = input("Слово:  ")
@@ -36,7 +39,7 @@ def play_game():
                 else:
                     print("Нет! Не верно!")
 
-            if game.is_over():
+            if game.check_over():
                 print(game.victory_message())
                 break
 

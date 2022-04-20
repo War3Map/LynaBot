@@ -5,17 +5,18 @@ from dataclasses import dataclass
 from random import randint
 from typing import Dict, Optional, Union, List
 
-from game_config import DRUM_SCORES, BANK, PLUS, PRIZE, X2, STATES_DESCRIPTIONS, ALPHABET
-from questions import load_questions, QUESTIONS_FILE
-from extra_mechanics import x2_action, bank_action, zero_action, prize_action
+from .game_config import DRUM_SCORES, ALPHABET
+from .questions import load_questions, QUESTIONS_FILE
+from .extra_mechanics import BONUSES,  TurnState, GameBonus
 
 
-class GameBonuses(enum.Enum):
-    Bank = BANK
-    Plus = PLUS
-    Prize = PRIZE
-    Zero = 0
-    x2 = X2
+#
+# class GameBonuses(enum.Enum):
+#     Bank = BANK
+#     Plus = PLUS
+#     Prize = PRIZE
+#     Zero = 0
+#     x2 = X2
 
 
 class GameStates(enum.Enum):
@@ -25,16 +26,16 @@ class GameStates(enum.Enum):
     Over = 4
 
 
-# game acrions
-STATES_ACTIONS = {
-    GameBonuses.Bank.value: bank_action,
-    GameBonuses.Zero.value: zero_action,
-    GameBonuses.x2.value: x2_action,
-    GameBonuses.Prize.value: prize_action,
-    GameBonuses.Plus.value: lambda s, ss: (True, 0)
-
-}
-
+# # game acrions
+# STATES_ACTIONS = {
+#     GameBonuses.Bank.value: bank_action,
+#     GameBonuses.Zero.value: zero_action,
+#     GameBonuses.x2.value: x2_action,
+#     GameBonuses.Prize.value: prize_action,
+#     GameBonuses.Plus.value: lambda s, ss: (True, 0)
+#
+# }
+#
 
 @dataclass
 class DreamGame:
@@ -55,11 +56,19 @@ class DreamGame:
     available_symbols: List[str] = list
     all_symbols: List[str] = None
     current_score: int = 0
+    turn_bonus: GameBonus = None
+    current_turn: int = 0
 
     def change_turn(self):
+        """
+        Change turn to other player
+        Clear all current states
+        :return:
+        """
         players_count = len(self.players_score)
         self.current_player = (self.current_player + 1) % players_count
         self.current_score = 0
+        self.turn_bonus = None
 
     def __get_question_word(self):
         total_len = len(self.questions)
@@ -99,6 +108,8 @@ class DreamGame:
         self.symbols_remain = len(self.suggested_word)
         self.available_symbols = ALPHABET.copy()
         self.all_symbols = ALPHABET.copy()
+        self.current_turn = 0
+        self.turn_bonus = None
         # print(f"Чит {self.suggested_word}")
 
     def reload_game(self, turn_order="random",
@@ -124,6 +135,8 @@ class DreamGame:
         self.display_word = self.__form_display_word()
         self.symbols_remain = len(self.suggested_word)
         self.available_symbols = ALPHABET.copy()
+        self.current_turn = 0
+        self.turn_bonus = None
         # print(f"Чит {self.suggested_word}")
 
     def join_player(self, name):
@@ -159,6 +172,16 @@ class DreamGame:
         return self.questions[self.suggested_word]
 
     @property
+    def score_message(self) -> str:
+        """
+        Message score
+        :return:
+        """
+        return f"{self.current_score} очков!"
+
+
+
+    @property
     def clean_word(self) -> str:
         """
         Starts a game session
@@ -185,7 +208,6 @@ class DreamGame:
         """
         player_name = self.turns_order[self.current_player]
         self.players_score[player_name] = 0
-
 
     def guess_symbol(self, guess_symbol: str):  # success_state = False
         """
@@ -264,6 +286,7 @@ class DreamGame:
             return
 
         plus_symbol = random.choice(unique_symbols)
+        self.available_symbols.remove(plus_symbol.upper())
 
         new_display = list(self.display_word)
         for idx, symbol in enumerate(self.suggested_word):
@@ -280,44 +303,58 @@ class DreamGame:
     def increase_current_score(self, score):
         self.current_score += score
 
-    def is_bonus(self,val):
-        return  val in STATES_ACTIONS
-
-    def check_bonus(self, val):
-        cur_score = self.cur_player_score
-        continue_turn, new_val = True, 0
-        if val in STATES_ACTIONS:
-            continue_turn, new_val = STATES_ACTIONS[val](cur_score, 0)
-            if val ==GameBonuses.Plus.value:
-                self.sector_plus_activate
-        return continue_turn, new_val
-
-    def get_bonus_info(self, val):
-        if val in STATES_DESCRIPTIONS:
-            return STATES_DESCRIPTIONS[val]
-        return ""
+    @property
+    def has_bonus(self):
+        """"""
+        return self.turn_bonus is not None
 
     def spin_drum(self):
         """
         Gets turn state and drum score.
 
-        :return: Can player play this turn, word update state, current score
+        :return: true if need spin again
         """
-
+        self.current_turn += 1
+        self.turn_bonus = None
         drum_val = random.choice(DRUM_SCORES)
-        if self.is_bonus(drum_val):
-            is_continue, new_val = self.check_bonus(drum_val)
-            info = self.get_bonus_info(drum_val)
-            if is_continue:
-                self.current_score += new_val
-            else:
-                self.change_turn()
-                print("ct")
-            return is_continue, f"{info}. Полученные очки {new_val}"
-        else:
-            self.current_score += drum_val
-            return False, f"{drum_val} очков на барабане!"
+        # print(f"Выпало {drum_val}")
+        bonus = None
+        if drum_val in BONUSES:
+            bonus = BONUSES[drum_val]
+            self.turn_bonus = bonus
 
+        if bonus is not None:
+            if bonus.can_apply:
+                self.current_score = bonus.apply(self.current_score)
+                self.increase_score()
+            # sector plus bonus activation
+            if bonus.name == "Плюс":
+                self.sector_plus_activate()
+
+            if bonus.turn_state == TurnState.Over:
+                # end player tirn
+                self.change_turn()
+                return False
+            elif bonus.turn_state == TurnState.Repeat:
+                # good bonus need to spin again
+                return True
+        self.current_score = drum_val
+        return False
+
+    @property
+    def turn_info(self):
+        clean_symbols = [sym for sym in self.display_word]
+        clean_word = " ".join(clean_symbols)
+        displayed_word = f"{clean_word} ({len(self.display_word)})"
+
+        return (f"!!!!Ход {self.current_turn}!!!!\n"
+                f"{self.game_question}\n"
+                f"{displayed_word}\n"
+                f"Ход игрока {self.current_player_name}\n"
+                f"Счёт игрока {self.current_player_name}: "
+                f"{self.cur_player_score}\n"
+                f"Вращается барабан..."
+                )
 
     def check_over(self):
         """
