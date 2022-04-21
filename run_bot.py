@@ -19,7 +19,7 @@ from additional.config_loader import get_setting
 
 # TODO: Сохранить в json и загружать из json
 TOKEN = os.getenv("TOKEN")
-
+DREAM_HELP = "".join(get_setting("DREAM_HELP"))
 
 # TODO: настроить логирование
 
@@ -144,6 +144,10 @@ def start_bot():
                             f'`{prefix}list`, `{prefix}pls` - покажу содержимое плейлиста)\n'
                             f'`{prefix}stop` - перестану проигрывать музыку\n'
                             f'`{prefix}volume level` - поменяю уровень громкости\n',
+                      inline=False)
+
+        emb.add_field(name='Игра поле чудес',
+                      value=DREAM_HELP.format(prefix=prefix),
                       inline=False)
 
         # Отображаемый блок текста. name - Жирный крупный текст | value - обычный текст под "name"

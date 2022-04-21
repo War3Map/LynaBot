@@ -9,8 +9,9 @@ class BonusTypes(enum.Enum):
 
 
 class TurnState(enum.Enum):
-    Over = 0
-    Repeat = 1
+    Over = 0    # change turn to other player
+    Repeat = 1  # spin drum again
+    Continue = 1  # continue guess words
 
 
 class GameBonus:
@@ -20,6 +21,7 @@ class GameBonus:
     score = 0
     increase_score_value = 0
     message = "Это не бонус"
+    current_message = ""
     score_func = lambda x: x + 100
 
     def __init__(self, name, type: BonusTypes,
@@ -28,6 +30,7 @@ class GameBonus:
                  increase_score_func):
         self.bonus_type = type
         self.message = message
+        self.current_message = message
         self.turn_state = turn_state
         self.score_func = increase_score_func
         self.can_apply = True if increase_score_func else False
@@ -40,7 +43,7 @@ class GameBonus:
         :return:
         """
         bonus_val = self.score_func(score)
-        self.message = f"{self.message}. Получено {bonus_val} очков."
+        self.current_message = f"{self.message}. Получено {bonus_val} очков."
         return bonus_val
 
     # @property
@@ -71,11 +74,11 @@ def zero_action(current_score) -> int:
 
 def x2_action(current_score) -> int:
     """
-
+    Returns current score action
     :param score:
     :return:  score and turn over state
     """
-    return current_score * 2
+    return current_score
 
 
 def prize_action(current_score) -> Tuple[int, bool]:
@@ -96,8 +99,8 @@ BANK = -4
 BONUSES = {
     -4: GameBonus("Банкрот", BonusTypes.Bad, "Теперь вы банкрот!", TurnState.Over, bank_action),
     -3: GameBonus("Приз", BonusTypes.Bad, "Сектор приз на барабане!", TurnState.Repeat, prize_action),
-    -2: GameBonus("Х2", BonusTypes.Bad, "Счёт удвоен!", TurnState.Repeat, x2_action),
+    -2: GameBonus("Х2", BonusTypes.Bad, "Счёт удвоен!", TurnState.Continue, x2_action),
     -1: GameBonus("Плюс", BonusTypes.Bad, "Сектор плюс на барабане!", TurnState.Repeat, None),
-    0: GameBonus("Ноль", BonusTypes.Bad, "Сектор ноль!", TurnState.Repeat, None),
+    0: GameBonus("Ноль", BonusTypes.Bad, "Сектор ноль!", TurnState.Continue, None),
 
 }

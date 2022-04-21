@@ -4,6 +4,8 @@ from random import randint
 import discord
 from discord.ext import commands
 
+from additional.config_loader import get_setting
+
 from selenium import webdriver
 
 from bs4 import BeautifulSoup
@@ -39,20 +41,7 @@ ABOUT = [
     'Мой любимый женский персонаж - Рукия Кучики'
 ]
 
-FUCKS_LIST = [
-    r'https://tenor.com/view/mr-bean-fuck-you-finger-middle-finger-fuck-off-gif-3528631',
-    r'https://tenor.com/view/fuck-fuck-off-fuckity-pissed-off-gif-9736688',
-    r'https://tenor.com/view/middlefinger-ryan-stiles-pocket-whose-gif-3863927',
-    r'https://tenor.com/view/fuck-you-middle-finger-flipping-off-flip-off-jack-nicholson-gif-5326673',
-    r'https://tenor.com/view/middle-finger-the-bird-flip-the-bird-flipping-the-bird-fuck-you-gif-5633646',
-    r'https://tenor.com/view/baby-girl-middle-finger-mood-screw-you-leave-me-alone-gif-10174031',
-    r'https://tenor.com/view/fuck-you-fuck-middle-finger-gif-14825969',
-    r'https://tenor.com/view/dragonball-fuck-off-middle-finger-dirty-finger-fuck-you-gif-7214436',
-    r'https://tenor.com/view/fuck-you-flip-the-bird-gif-5847111',
-    r'https://tenor.com/view/oniai-anastasia-nasuhara-anime-middle-finger-flip-off-gif-15308749',
-    r'https://tenor.com/view/homer-middle-finger-the-simpsons-fuck-you-gif-11674252',
-    r'.!.',
-]
+FUCKS_LIST = get_setting("FUCKS_LIST")
 
 FACT_SITE = 'http://freegenerator.ru/fact'
 

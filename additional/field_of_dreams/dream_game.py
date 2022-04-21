@@ -57,7 +57,7 @@ class DreamGame:
     all_symbols: List[str] = None
     current_score: int = 0
     turn_bonus: GameBonus = None
-    current_turn: int = 0
+    current_turn: int = 1
 
     def change_turn(self):
         """
@@ -67,8 +67,6 @@ class DreamGame:
         """
         players_count = len(self.players_score)
         self.current_player = (self.current_player + 1) % players_count
-        self.current_score = 0
-        self.turn_bonus = None
 
     def __get_question_word(self):
         total_len = len(self.questions)
@@ -108,7 +106,7 @@ class DreamGame:
         self.symbols_remain = len(self.suggested_word)
         self.available_symbols = ALPHABET.copy()
         self.all_symbols = ALPHABET.copy()
-        self.current_turn = 0
+        self.current_turn = 1
         self.turn_bonus = None
         # print(f"Чит {self.suggested_word}")
 
@@ -127,7 +125,7 @@ class DreamGame:
         players_list = self.turns_order
         if players_list is None:
             players_list = []
-        self.players_score = {player: 0 for player in players_list}
+        # не будем обнулять очки
         self.turns_order = players_list.copy()
         if turn_order == "random":
             random.shuffle(self.turns_order)
@@ -135,7 +133,7 @@ class DreamGame:
         self.display_word = self.__form_display_word()
         self.symbols_remain = len(self.suggested_word)
         self.available_symbols = ALPHABET.copy()
-        self.current_turn = 0
+        self.current_turn = 1
         self.turn_bonus = None
         # print(f"Чит {self.suggested_word}")
 
@@ -197,8 +195,9 @@ class DreamGame:
         :return:  game over message
         """
         self.game_state = GameStates.Awaiting
+        self.prepare_game()
         return (f"Игра окончена!\n"
-                f"{self.suggested_word}"
+                f"Загаданное слово: {self.suggested_word}\n"
                 )
 
     def reset_score(self):
@@ -314,18 +313,21 @@ class DreamGame:
 
         :return: true if need spin again
         """
+        self.current_score = 0
         self.current_turn += 1
         self.turn_bonus = None
         drum_val = random.choice(DRUM_SCORES)
         # print(f"Выпало {drum_val}")
         bonus = None
+        # print(f"Вращаем барабан. Ход: {self.current_turn}")
         if drum_val in BONUSES:
             bonus = BONUSES[drum_val]
             self.turn_bonus = bonus
 
+
         if bonus is not None:
             if bonus.can_apply:
-                self.current_score = bonus.apply(self.current_score)
+                self.current_score = bonus.apply(self.cur_player_score)
                 self.increase_score()
             # sector plus bonus activation
             if bonus.name == "Плюс":
@@ -334,6 +336,9 @@ class DreamGame:
             if bonus.turn_state == TurnState.Over:
                 # end player tirn
                 self.change_turn()
+                return True
+            elif bonus.turn_state == TurnState.Continue:
+                # good bonus need to spin again
                 return False
             elif bonus.turn_state == TurnState.Repeat:
                 # good bonus need to spin again
@@ -403,6 +408,7 @@ class DreamGame:
         other_scores = [f"{player} - {score}\n" for player, score in self.players_score.items()]
         str_scores = "\n".join(other_scores)
         win_message = (f"И перед нами победитель: {self.victory_player} !!!\n"
+                       f"Загаданное слово: {self.suggested_word}.\n"
                        f"Весь счёт: {str_scores}")
         draw_message = (f"У нас ничья! Загаданное слово {self.suggested_word}\n !"
                         f"Весь счёт: {str_scores}")
