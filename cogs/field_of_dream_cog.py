@@ -43,7 +43,12 @@ class DreamGameCog(commands.Cog):
         repeat_spin = game.spin_drum()
 
         if game.has_bonus:
-            await context.send(game.turn_bonus.current_message)
+            additional = ""
+            messages = [game.turn_bonus.current_message]
+            if game.turn_bonus.name == "Плюс":
+                messages.append(game.clean_word)
+            await context.send("\n".join(messages))
+
         else:
             await context.send(game.score_message)
 
@@ -82,7 +87,7 @@ class DreamGameCog(commands.Cog):
             await context.send(f"Нет! Не верно!")
             # print(f"{allin_player}")
             if allin_player:
-                await context.send(f"Игрок {allin_player} проиграл")
+                await context.send(f"Игрок {allin_player} проиграл!")
                 game.lose_player(allin_player)
 
         if game.check_over():
@@ -99,7 +104,7 @@ class DreamGameCog(commands.Cog):
         :param context:
         :return:
         """
-        player_name = context.message.author
+        player_name = str(context.message.author)
         session_name = context.channel.id
         if not self.sessions.exists(session_name):
             game = DreamGame()
@@ -119,7 +124,7 @@ class DreamGameCog(commands.Cog):
                 game.join_player(player_name)
                 await context.send(f"Внимание! Идет подготовка к игре {game.name}!")
 
-    @commands.command(description=' Запускаю поле чудес)',
+    @commands.command(description=' останавливаю поле чудес)',
                       aliases=['stop_fd', 'stop_pole'])
     async def stop_dg(self, context):
         """
@@ -128,7 +133,7 @@ class DreamGameCog(commands.Cog):
         :param context:
         :return:
         """
-        player_name = context.message.author
+        player_name = str(context.message.author)
         session_name = context.channel.id
         if not self.sessions.exists(session_name):
             await context.send(f"Игровая сессия ещё не начата!")
@@ -148,7 +153,7 @@ class DreamGameCog(commands.Cog):
         :param context:
         :return:
         """
-        player_name = context.message.author
+        player_name = str(context.message.author)
         session_name = context.channel.id
         if not self.sessions.exists(session_name):
             await context.send(f"Игровая сессия {session_name} отсутствует")
@@ -171,11 +176,11 @@ class DreamGameCog(commands.Cog):
                       aliases=['dc', 'exit_chud', 'exit_dream'])
     async def exit_game(self, context):
         """
-        Join player to game to
+        Exit player from game
         :param context:
         :return:
         """
-        player_name = context.message.author
+        player_name = str(context.message.author)
         session_name = context.channel.id
         if not self.sessions.exists(session_name):
             await context.send(f"Игровая сессия {session_name} отсутствует")
@@ -183,9 +188,26 @@ class DreamGameCog(commands.Cog):
 
         game: DreamGame = self.sessions.get_game(session_name)
         if player_name in game.turns_order:
-            game.lose_player(player_name)
-
+            game.leave_player(player_name)
             await context.send(f"Игрок {player_name} вышел из игры {session_name}!")
+
+    @commands.command(description='список ироков',
+                      aliases=['dream_players'])
+    async def players(self, context):
+        """
+        Exit player from game
+        :param context:
+        :return:
+        """
+        player_name = str(context.message.author)
+        session_name = context.channel.id
+        if not await self.check_session(session_name, context):
+            return
+
+        game: DreamGame = self.sessions.get_game(session_name)
+        current_players = "\n".join(game.turns_order)
+        all_players = "\n".join(list(game.players_score))
+        await context.send(f"Текущие игроки: {current_players}\nВсе игроки: {all_players}")
 
     @commands.command(description='Запускаю поле чудес',
                       aliases=['sdg', 'start_chud', 'start_dream'])
@@ -196,7 +218,7 @@ class DreamGameCog(commands.Cog):
         :param context:
         :return:
         """
-        player_name = context.message.author
+        player_name = str(context.message.author)
         session_name = context.channel.id
         if not self.sessions.exists(session_name):
             await context.send(f"Игровая сессия {session_name} отсутствует")
@@ -228,7 +250,7 @@ class DreamGameCog(commands.Cog):
         :param context:
         :return:
         """
-        player_name = context.message.author
+        player_name = str(context.message.author)
         session_name = context.channel.id
 
         if not self.sessions.exists(session_name):
@@ -242,9 +264,13 @@ class DreamGameCog(commands.Cog):
                                f"владельцев сессии!")
             return
         game = self.sessions.get_game(session_name)
-        stop_message = game.stop_game()
-        await context.send(f"Игра остановлена! {stop_message}."
-                           f" Игроки могут присоедениться!")
+        if game.game_state == GameStates.Awaiting:
+            await context.send(f"Игра в сессии {session_name} ещё не стартовала")
+            return
+
+        stop_message = game.stop_game(new_questions_file=DreamGameCog.questions_file)
+        await context.send(f"Игра остановлена! {stop_message}\n"
+                           f"Игроки могут присоедениться!")
 
     @commands.command(description='Запускаю поле чудес',
                       aliases=['rsgd', 'restart_chud', 'restart_dream'])
@@ -255,7 +281,7 @@ class DreamGameCog(commands.Cog):
         :param context:
         :return:
         """
-        player_name = context.message.author
+        player_name = str(context.message.author)
         session_name = context.channel.id
         if not self.sessions.exists(session_name):
             await context.send(f" Игры {session_name} не существует!")
@@ -273,7 +299,7 @@ class DreamGameCog(commands.Cog):
     @commands.command(description='угадай символ',
                       aliases=['guess_s', 'guess_char', 'symbol', 'sym'])
     async def guess_symbol(self, context, symbol):
-        player_name = context.message.author
+        player_name = str(context.message.author)
         session_name = context.channel.id
         if not self.sessions.exists(session_name):
             await context.send(f"Игровая сессия {session_name} отсутствует")
@@ -311,7 +337,7 @@ class DreamGameCog(commands.Cog):
         """
         Shows remaining alphabet symbols
         """
-        player_name = context.message.author
+        player_name = str(context.message.author)
         session_name = context.channel.id
         session_exists = await self.check_session(session_name, context)
         if not session_exists:
@@ -340,7 +366,7 @@ class DreamGameCog(commands.Cog):
     @commands.command(description='угадай слово',
                       aliases=['guess_w', 'guess_wor', 'wor', 'word'])
     async def guess_word(self, context, word):
-        player_name = context.message.author
+        player_name = str(context.message.author)
         session_name = context.channel.id
         if not self.sessions.exists(session_name):
             await context.send(f"Игровая сессия {session_name} отсутствует")

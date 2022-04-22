@@ -3,6 +3,7 @@ PLUS = -1
 X2 = -2
 BANK = -4
 
+DEFAULT_QUESTIONS_FILE = "questions.csv"
 ALPHABET = list("йцукенгшщзхъфывапролджэячсмитьбюё".upper())
 
 STATES_DESCRIPTIONS = {
@@ -73,10 +74,9 @@ EXTRA_DECISIONS = {
 #
 # ]
 #
-# DRUM_SCORES = [
-#     0,
-#     -3,
-#     -2,
-#     -1
-#
-# ]
+DRUM_SCORES = [
+    100,
+    100,
+    -1
+
+]

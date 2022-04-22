@@ -37,6 +37,7 @@
       "`{prefix}restart_dream`, `{prefix}restart_chud` - Перезапускаю игру, с сохранением результатов\n",
       "`{prefix}guess_s`, `{prefix}sym`, `{prefix}symbol` - Текущий игрок угадывает букву в слове\n",
       "`{prefix}guess_w`, `{prefix}wor`, `{prefix}word` - Текущий игрок угадывает слово целиком\n",
-      "`{prefix}show_alpha`, `{prefix}alpha` - Показываю оставшиеся буквы игроку\n"
+      "`{prefix}show_alpha`, `{prefix}alpha` - Показываю оставшиеся буквы игроку\n",
+      "`{prefix}players` - Показываю список игроков\n"
   ]
 }
