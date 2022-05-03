@@ -57,7 +57,7 @@ def parse_html(url):
     return res_question_message, res_question_answer
 
 
-for idx in range(1, 30001):
+for idx in range(2200, 30001):
     url = f"http://100500otvetov.ru/page/vopros-{idx}"
     print(f"Getting data from: {url}")
     try:
@@ -67,4 +67,4 @@ for idx in range(1, 30001):
             writer.writerow((question, answer))
     except Exception as ex:
         print(ex)
-    time.sleep(0.3)
+    # time.sleep(0.3)
