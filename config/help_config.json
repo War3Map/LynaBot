@@ -1,0 +1,58 @@
+{
+  "MANAGE_HELP" : [
+    "`{prefix}move user channel`  - перемещу пользователя в указанный канал)\n",
+    "`{prefix}crtc name`  - создам новый текстовый канал с именем name)\n",
+    "`{prefix}crvc name`  - создам новый голосовой канал с именем name)\n",
+    "`{prefix}create [v/t] name,name1...`  - создам сразу несколько голосовых",
+    " или текстовых каналов\n",
+    "`{prefix}createm [v/t] name [start_num end_num]` - создам сразу несколько голосовых",
+    " или текстовых каналов с приписками справа)\n",
+    "`{prefix}deletem name [start_num end_num]`  - удалю каналы с приписками справа)\n",
+    "`{prefix}del name`  - удалю канал с именем name)\n",
+    "`{prefix}rename member_name new` - сменю ник\n",
+    "`{prefix}kick member_name` - выкину нехорошего человека с сервера\n",
+    "`{prefix}ban member_name` - забаню нехорошего человека\n",
+    "`{prefix}unban member_name` - разбаню того, кто это заслужил\n"
+  ],
+  "TEXT_HELP" : [
+    "`{prefix}hello` - поприветствую тебя\n",
+    "`{prefix}phrase` - не хочешь крутую фразочку?)\n",
+    "`{prefix}here`  - отвечу тебе, если я тут)\n",
+    "`{prefix}fact` - отправлю случайный факт из интернета\n",
+    "`{prefix}quote` - отправлю цитату из интернета\n",
+    "`{prefix}fuc`, `{prefix}f`  - хочешь факулечку?)\n",
+    "`{prefix}me`, `{prefix}info`  - расскажу тебе факт обо мне\n",
+    "`{prefix}status`, `{prefix}presence new`  - изменю свой статус на новый (для админов)\n"
+  ],
+  "ENTERTAINMENT_HELP" : [
+    "`{prefix}dice n m` - брошу кубик c m-гранями n раз  \n",
+    "`{prefix}choose c1 c2 ...` - выберу один из вариантов \n",
+    "`{prefix}rand`, `{prefix}r`, `{prefix}random [startn endn]`",
+    ",- выберу случайное число \n",
+    "`{prefix}image`, `{prefix}img`, `{prefix}im`, `{prefix}i`",
+    ", - отправлю случайную картинку из интернета\n",
+    "`{prefix}gif`, `{prefix}gff`, `{prefix}gf`",
+    ", - отправлю случайную gif - картинку из интернета\n",
+    "`{prefix}girl`, `{prefix}g`",
+    ", - отправлю случайную картинку девушки из интернета\n",
+    "`{prefix}anime`, `{prefix}a`",
+    ", - отправлю случайную картинку аниме-девушки из интернета\n"
+  ],
+  "VOICE_HELP" : [
+    "`{prefix}join` - подключусь к голосовому каналу\n",
+    "`{prefix}leave` - покину голосовой канал\n",
+    "`{prefix}playf file`, `{prefix}play_file file`,",
+    " `{prefix}plf file` - проиграю файл, если он у меня есть)\n",
+    "`{prefix}playnow link`, `{prefix}play_now link`,",
+    " `{prefix}playn link`, `{prefix}pln link` - ТОЛЬКО ДЛЯ АДМИНОВ:",
+    " проиграю файл по ссылке(с предзагрузкой)\n",
+    "`{prefix}stream link`, `{prefix}strm link`- ТОЛЬКО ДЛЯ АДМИНОВ:",
+    " проиграю файл по ссылке\n",
+    "`{prefix}play link`, `{prefix}addp link`,",
+    " `{prefix}pladd link`, `{prefix}ppl link` - добавлю файл в плейлист",
+    " и проиграю его когда прийдёт его время)\n",
+    "`{prefix}list`, `{prefix}pls` - покажу содержимое плейлиста)\n",
+    "`{prefix}stop` - перестану проигрывать музыку\n",
+    "`{prefix}volume level` - поменяю уровень громкости\n"
+  ]
+}
