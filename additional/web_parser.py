@@ -16,6 +16,8 @@ HEADERS = {
 
 }
 
+
+
 FACT_URL = "https://randstuff.ru/fact/"
 QUOTE_URL = "https://citaty.info/random"
 
@@ -104,6 +106,26 @@ def get_gif_test(response):
     except Exception as ex:
         print(ex)
         return None
+
+
+PARSERS = {
+    "fact": get_fact_result,
+    "quote": get_quote_result
+
+}
+
+
+async def get_info_from_url(url, info_type: str):
+    """
+    Parse html for info
+    :param url:
+    :param info_type: "fact" or"quote"
+    :return:
+    """
+
+    parse_func = PARSERS[info_type] if info_type in PARSERS else PARSERS["fact"]
+    return parse_from_html_test(parse_func, url)
+
 
 
 def test():
