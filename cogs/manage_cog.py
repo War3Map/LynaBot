@@ -20,9 +20,11 @@ class ManageCog(commands.Cog):
     async def create_text_channel(self, context, channel_name):
         """
         Creates a new text channel
-        :param context:
-        :param channel_name:
-        :return:
+
+        :param context: discord bot context object
+
+        :param channel_name: name of channel
+
         """
         guild = context.guild
         existing_channel = discord.utils.get(guild.channels, name=channel_name)
@@ -181,6 +183,14 @@ class ManageCog(commands.Cog):
         invitelink = await context.channel.create_invite(max_age=90, max_uses=1, unique=True)
         await context.send(invitelink)
 
+    @commands.command()
+    # @commands.has_permissions(administrator=True)
+    @commands.has_role('admin')
+    async def purge(self, context, count: int):
+        await context.channel.purge(limit=count + 1)
+
     @commands.Cog.listener()
     async def on_message(self, message):
         pass
+
+
