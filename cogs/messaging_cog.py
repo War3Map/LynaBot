@@ -67,6 +67,9 @@ class MessagingCog(commands.Cog):
                       help="отправлю факулечки")
     async def fuc(self, context, count=1):
         """Sends a fuck sign gif"""
+        if count > 20:
+            await context.send("Слишком многого хочешь!")
+            return
         for _ in range(count):
             await context.send(random.choice(FUCKS_LIST))
 
