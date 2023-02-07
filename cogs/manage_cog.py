@@ -192,5 +192,3 @@ class ManageCog(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message):
         pass
-
-
