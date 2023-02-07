@@ -162,7 +162,10 @@ def start_bot():
     discord_bot.add_cog(voice_cog.VoiceCog(discord_bot))
     discord_bot.add_cog(manage_cog.ManageCog(discord_bot))
     discord_bot.add_cog(field_of_dream_cog.DreamGameCog(discord_bot))
-    discord_bot.run(TOKEN)
+    try:
+        discord_bot.run(TOKEN)
+    except RuntimeError:
+        print("Бот выключен")
 
     # cog = discord_bot.get_cog('MessagingCog')
     # commands = cog.get_commands()
