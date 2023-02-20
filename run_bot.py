@@ -22,7 +22,7 @@ from additional.config_loader import get_setting
 from dotenv import load_dotenv
 
 root = logging.getLogger()
-root.setLevel(logging.DEBUG)
+root.setLevel(logging.INFO)
 load_dotenv()
 
 TOKEN = os.getenv("TOKEN")
