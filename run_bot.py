@@ -19,6 +19,11 @@ from cogs import (
 
 import additional.config_loader
 from additional.config_loader import get_setting
+from dotenv import load_dotenv
+
+root = logging.getLogger()
+root.setLevel(logging.DEBUG)
+load_dotenv()
 
 TOKEN = os.getenv("TOKEN")
 DREAM_HELP = "".join(get_setting("DREAM_HELP"))
@@ -31,14 +36,14 @@ WELCOME_CHAT_ID = get_setting("WELCOME_CHAT_ID")
 
 
 # TODO: настроить логирование
-def log_exp(message: str, type="info"):
+def log_exp(message: str, log_type="info"):
     """
     Temp func for logging
     :param message: log message
     :return:
     """
-    if type =="error":
-        logging.error()
+    if log_type == "error":
+        logging.error(message)
     else:
         logging.info(message)
 
