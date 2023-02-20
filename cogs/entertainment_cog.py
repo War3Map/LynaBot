@@ -4,9 +4,9 @@ import random
 # import discord
 import requests
 
-from discord.ext import commands
-from bs4 import BeautifulSoup
 
+from bs4 import BeautifulSoup
+from discord.ext import commands
 
 from additional.web_parser import parse_from_html_test, get_gif_test
 from additional.config_loader import get_setting
@@ -141,3 +141,4 @@ class EntertainmentCog(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message):
         pass
+
